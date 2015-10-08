@@ -2,15 +2,35 @@
 //Carson Miller
 //10-7-2015
 
+
+/* 
+Things to modify:
+	-fix winDetect()
+	-shallower recursion beginning, allow deeper as game goes on
+	-weight certain situations at certain situations in the game more heavily
+	-Make the board easier to read
+		-add cell borders
+		-add colors
+		-clear screen between each new print of the board
+
+*/
+
+
+
 #include <iostream>
 #include <windows.h>
+#include <stdlib.h>
 
 using namespace std;
 
+
 //pDisc =  disc; cDisc = computer disc; nDisc = no disc
-const int pDisc = 1, cDisc = 2, nDisc = 0;
-const int w_ = 7, h_ = 6;
-const int MAX_ITER = 8;
+	const int pDisc = 1, cDisc = 2, nDisc = 0;
+//width and height variables
+	const int w_ = 7, h_ = 6;
+//Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
+	const int MAX_ITER = 9;
+
 
 //returns true if move is valid, returns false if not
 bool playMove(int board[][w_], int col, int who);
@@ -26,6 +46,7 @@ void printBoard(int board[][w_]);
 
 //copies the board
 void copyBoard(int board[][w_], int newBoard[][w_]);
+
 int main()
 {
 	int board[h_][w_]; //the main board
@@ -290,7 +311,10 @@ bool winDetect(int board[][w_], int who)
 
 void printBoard(int board[][w_])
 {
-	cout << "1\t2\t3\t4\t5\t6\t7\n\n";
+	for(int i = 1; i <= w_; i++)
+		cout << i << "\t";
+
+	cout << "\n\n";
 
 	for (int r = 0; r < h_; r++)
 	{
