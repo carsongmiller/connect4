@@ -3,7 +3,6 @@
 //10-7-2015
 
 #include <iostream>
-#include <conio.h>
 #include <windows.h>
 
 using namespace std;
