@@ -20,6 +20,7 @@ Things to modify:
 #include <iostream>
 #include <windows.h>
 #include <stdlib.h>
+#include <cstdlib>
 
 using namespace std;
 
@@ -70,6 +71,7 @@ int main()
 
 
 		//First output of the program:
+		system("cls")
 
 		cout << "CONNECT 4!\n\nWho should go first? (m for me, c for computer): ";
 		cin >> whoFirst;
@@ -85,7 +87,11 @@ int main()
 				cin >> moveChoice;
 
 				if (!playMove(board, moveChoice-1, pDisc))
-					cout << "There is no space in that column, choose a different one\n";
+					cout << "There is no space in that column, choose a different one\n\n";
+
+				if(moveChoice > w_)
+					cout << "There is no column " << moveChocie << ". Please choose a column between 1 and " << w_ << "\n\n";
+				
 				else
 					validMove = true;
 			}
@@ -130,18 +136,25 @@ int main()
 			}
 
 			//now the player's turn
+			//Player chosing his move
+				validMove = false;
+				while (!validMove)
+				{
+					cout << "Where would you like to go? (enter column number): ";
+					cin >> moveChoice;
 
-			validMove = false;
-			while (!validMove)
-			{
-				cout << "Where would you like to go? (enter column number): ";
-				cin >> moveChoice;
+					if (!playMove(board, moveChoice-1, pDisc))
+						cout << "There is no space in that column, choose a different one\n";
+					else
+						validMove = true;
+				}
 
-				if (!playMove(board, moveChoice-1, pDisc))
-					cout << "There is no space in that column, choose a different one\n";
-				else
-					validMove = true;
-			}
+			//detecting a player win	
+				if (winDetect(board, cDisc))
+				{
+					cout << "\nYou win!\n";
+					break;
+				}
 
 		}
 

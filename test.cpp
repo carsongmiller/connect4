@@ -1,35 +1,38 @@
 #include <iostream>
+#include <windows.h>
 
 using namespace std;
 
 const int w_ = 7;
 const int h_ = 6;
 
-void copyBoard(int board[][w_], int newBoard[][w_])
-{
-	for(int r = 0; r < h_; r++)
-	{
-		for(int c = 0; c < w_; c++)
-		{
-			newBoard[r][c] = board[r][c];
-		}
-	}
-}
-
 int main()
 {
-	int board[h_][w_], newBoard[h_][w_];
-	for(int r = 0; r < h_; r++)
+	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	int BLACK = 0;
+	int BLUE = 1;
+	int GREEN = 2;
+	int CYAN = 3;
+	int RED = 4;
+	int MAGENTA = 5;
+	int BROWN = 6;
+	int LIGHTGRAY = 7;
+	int DARKGRAY = 8;
+	int LIGHTBLUE = 9;
+	int LIGHTGREEN = 10;
+	int LIGHTCYAN = 11;
+	int LIGHTRED = 12;
+	int LIGHTMAGENTA = 13;
+	int YELLOW = 14;
+	int WHITE = 15;
+
+
+	for(int i = 0; i < 16; i++)
 	{
-		for(int c = 0; c < w_; c++)
-		{
-			board[r][c] = r;
-		}
+		SetConsoleTextAttribute(H, i);
+		cout << "TEXT\n";
 	}
-	copyBoard(board, newBoard);
-
-	cout << newBoard[0][0] << "\t" << newBoard[1][1] << "\t" << newBoard[2][2] << endl;
-
 	return 0;
 }
 
