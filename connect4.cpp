@@ -3,15 +3,19 @@
 //10-7-2015
 
 
-/* 
+/*
+
 Things to modify:
-	-fix winDetect()
-	-shallower recursion beginning, allow deeper as game goes on
-	-weight certain situations at certain situations in the game more heavily
-	-Make the board easier to read
-		-add cell borders
-		-add colors
-		-clear screen between each new print of the board
+-fix winDetect() (I think it's working now)
+-shallower recursion beginning, allow deeper as game goes on
+-weigh certain situations at certain situations in the game more heavily
+-when the board is symmetrical, the scores for each column should be symmetrical
+-consider adding a small bit of randomness into minimax
+	-like if two options are both very good and within %20 of eachother or something
+	-add a chance that the "worse" one is chosen
+-weigh scores better
+-consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
+	-this would be overwritten by logic that makes minimax go shallower at the beginning
 
 */
 
@@ -21,16 +25,38 @@ Things to modify:
 #include <windows.h>
 #include <stdlib.h>
 #include <cstdlib>
+#include <string>
 
 using namespace std;
 
 
 //pDisc =  disc; cDisc = computer disc; nDisc = no disc
-	const int pDisc = 1, cDisc = 2, nDisc = 0;
+const int pDisc = 1, cDisc = 2, nDisc = 0;
 //width and height variables
-	const int w_ = 7, h_ = 6;
+const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-	const int MAX_ITER = 9;
+const int MAX_ITER = 7;
+
+
+//Values for SetConsoleTextAttribute()
+HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
+
+const int BLACK = 0;
+const int BLUE = 1;
+const int GREEN = 2;
+const int CYAN = 3;
+const int RED = 4;
+const int MAGENTA = 5;
+const int BROWN = 6;
+const int LIGHTGRAY = 7;
+const int DARKGRAY = 8;
+const int LIGHTBLUE = 9;
+const int LIGHTGREEN = 10;
+const int LIGHTCYAN = 11;
+const int LIGHTRED = 12;
+const int LIGHTMAGENTA = 13;
+const int YELLOW = 14;
+const int WHITE = 15;
 
 
 //returns true if move is valid, returns false if not
@@ -47,6 +73,16 @@ void printBoard(int board[][w_]);
 
 //copies the board
 void copyBoard(int board[][w_], int newBoard[][w_]);
+
+//prints a given string of text in a different color then changes the text color back to white (overloaded for string, int, and char arguments)
+void printColor(string str, int color);
+void printColor(int i, int color);
+void printColor(char c, int color);
+
+//returns an appropriate symbol for the given index when given the board
+char getChar(int board[][w_], int r, int c);
+
+
 
 int main()
 {
@@ -71,7 +107,7 @@ int main()
 
 
 		//First output of the program:
-		system("cls")
+		system("cls");
 
 		cout << "CONNECT 4!\n\nWho should go first? (m for me, c for computer): ";
 		cin >> whoFirst;
@@ -86,16 +122,20 @@ int main()
 				cout << "Where would you like to go? (enter column number): ";
 				cin >> moveChoice;
 
-				if (!playMove(board, moveChoice-1, pDisc))
+				if (!playMove(board, moveChoice - 1, pDisc))
 					cout << "There is no space in that column, choose a different one\n\n";
 
-				if(moveChoice > w_)
-					cout << "There is no column " << moveChocie << ". Please choose a column between 1 and " << w_ << "\n\n";
-				
+				if (moveChoice > w_)
+					cout << "There is no column " << moveChoice << ". Please choose a column between 1 and " << w_ << "\n\n";
+
 				else
 					validMove = true;
 			}
 		}
+
+		system("cls");
+		cout << "CONNECT 4!\n\n\n";
+		printBoard(board);
 
 		//MAIN GAME LOOP
 
@@ -110,9 +150,6 @@ int main()
 
 			minimax(board, score, cDisc, cDisc, 0);
 
-			//printing the score array for debugging
-				for(int i = 0; i < w_; i++)
-					cout << score[i] << "\t";
 
 			cout << endl << endl;
 
@@ -127,6 +164,16 @@ int main()
 			//now the computer will make its move
 
 			playMove(board, bestScore, cDisc);
+
+			system("cls");
+			cout << "CONNECT 4!\n\n\n";
+
+			//printing the score array for debugging
+				for (int i = 0; i < w_; i++)
+					cout << score[i] << "\t";
+
+			cout << "\n";
+
 			printBoard(board);
 
 			if (winDetect(board, cDisc))
@@ -137,24 +184,28 @@ int main()
 
 			//now the player's turn
 			//Player chosing his move
-				validMove = false;
-				while (!validMove)
-				{
-					cout << "Where would you like to go? (enter column number): ";
-					cin >> moveChoice;
+			validMove = false;
+			while (!validMove)
+			{
+				cout << "Where would you like to go? (enter column number): ";
+				cin >> moveChoice;
 
-					if (!playMove(board, moveChoice-1, pDisc))
-						cout << "There is no space in that column, choose a different one\n";
-					else
-						validMove = true;
-				}
+				if (!playMove(board, moveChoice - 1, pDisc))
+					cout << "There is no space in that column, choose a different one\n";
+				else
+					validMove = true;
+			}
+
+				system("cls");
+				cout << "CONNECT 4!\n\n\n";
+				printBoard(board);
 
 			//detecting a player win	
-				if (winDetect(board, cDisc))
-				{
-					cout << "\nYou win!\n";
-					break;
-				}
+			if (winDetect(board, pDisc))
+			{
+				cout << "\nYou win!\n";
+				break;
+			}
 
 		}
 
@@ -191,7 +242,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 {
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
-	if(iter <= MAX_ITER)
+	if (iter <= MAX_ITER)
 	{
 		for (int i = 0; i < w_; i++)
 		{
@@ -199,25 +250,25 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 			{
 				if (winDetect(newBoard, cDisc))
 				{
-					if(iter < 2)
+					if (iter == 0)
 					{
 						score[i] += 1000;
 					}
 					else
 						score[i] += (MAX_ITER - iter);
 				}
-				
+
 
 				else if (winDetect(newBoard, pDisc))
-				{	
-					if(iter < 2)
+				{
+					if (iter == 1)
 					{
 						score[i] += 500;
 					}
 					else
 						score[i] -= (MAX_ITER - iter);
 				}
-				
+
 
 				else if (!winDetect(newBoard, cDisc) && !winDetect(newBoard, pDisc))
 				{
@@ -226,7 +277,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 					else if (currentCheck == pDisc)
 						currentCheck = cDisc;
 
-					minimax(newBoard, score, who, currentCheck, iter+1);
+					minimax(newBoard, score, who, currentCheck, iter + 1);
 				}
 			}
 		}
@@ -322,20 +373,76 @@ bool winDetect(int board[][w_], int who)
 
 
 
+//Following code is pretty messy, but it works and makes a nice print out
+
 void printBoard(int board[][w_])
 {
-	for(int i = 1; i <= w_; i++)
-		cout << i << "\t";
+	for (int i = 1; i <= w_; i++)
+	{
+		cout << "    ";
+		printColor(i, GREEN);
+		cout << "\t";
+	}
 
-	cout << "\n\n";
+	cout << "\n+";
 
+	//First row of ----+----
+	for (int i = 0; i < w_; ++i)
+		cout << "-------+";
+
+	cout << "\n";
+
+
+	//rows of cells with discs in them	
 	for (int r = 0; r < h_; r++)
 	{
-		for (int c = 0; c < w_; c++)
-			cout << board[r][c] << "\t";
+		//First Row of | with no discs
+			cout << "|   ";
 
-		cout << "\n";
+			for (int i = 0; i < w_; i++)
+				cout << "    |   ";
+
+		//Row with discs
+
+			cout << "\n|   ";
+
+			for (int c = 0; c < w_; c++)
+			{
+				//decide which disc to print
+				if (board[r][c] == 0)
+					cout << getChar(board, r, c);
+				else if (board[r][c] == 1)
+					printColor(getChar(board, r, c), LIGHTRED);
+				else if (board[r][c] == 2)
+					printColor(getChar(board, r, c), LIGHTBLUE);
+
+				cout << "   |   ";
+			}
+
+		//Second Row of | with no discs
+			cout << "\n|   ";
+
+			for (int i = 0; i < w_; i++)
+				cout << "    |   ";
+
+		//Bottom of each cell ----+----
+			cout << "\n+";
+
+			for (int i = 0; i < w_; ++i)
+				cout << "-------+";
+
+			cout << "\n";
 	}
+}
+
+
+
+char getChar(int board[][w_], int r, int c)
+{
+	if (board[r][c] == 0)
+		return ' ';
+	else if (board[r][c] == 1 || board[r][c] == 2)
+		return 'O';
 }
 
 
@@ -349,4 +456,27 @@ void copyBoard(int board[][w_], int newBoard[][w_])
 			newBoard[r][c] = board[r][c];
 		}
 	}
+}
+
+
+
+void printColor(string str, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << str;
+	SetConsoleTextAttribute(H, WHITE);
+}
+
+void printColor(int i, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << i;
+	SetConsoleTextAttribute(H, WHITE);
+}
+
+void printColor(char c, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << c;
+	SetConsoleTextAttribute(H, WHITE);
 }
