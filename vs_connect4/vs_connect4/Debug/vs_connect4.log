@@ -1,14 +1,47 @@
-﻿Build started 10/8/2015 9:01:56 PM.
+﻿Build started 10/9/2015 11:57:42 AM.
      1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\vs_connect4\vs_connect4.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Source.cpp
-         Source.cpp
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\source.cpp(438): warning C4715: 'getChar': not all control paths return a value
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\vs_connect4.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\vs_connect4.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\vs_connect4.lib" /MACHINE:X86 Debug\Source.obj
-         vs_connect4.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\vs_connect4.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\vs_connect4\vs_connect4.vcxproj" (Build target(s)).
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp minimax.cpp
+         minimax.cpp
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(11): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(14): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(17): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(20): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(23): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(26): error C2065: 'string': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(26): error C2146: syntax error: missing ')' before identifier 'str'
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(31): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(8): error C2131: expression did not evaluate to a constant
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(8): note: failure was caused by non-constant arguments or reference to a non-constant symbol
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(8): note: see usage of 'w_'
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(10): error C2131: expression did not evaluate to a constant
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(10): note: failure was caused by non-constant arguments or reference to a non-constant symbol
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(10): note: see usage of 'h_'
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(11): error C2664: 'void copyBoard(int [][1],int [][1])': cannot convert argument 1 from 'int [][w_]' to 'int [][1]'
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(11): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(12): error C2065: 'MAX_ITER': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(16): error C2664: 'bool playMove(int [][1],int,int)': cannot convert argument 1 from 'int [h_][w_]' to 'int [][1]'
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(16): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(18): error C2664: 'bool winDetect(int [][1],int)': cannot convert argument 1 from 'int [h_][w_]' to 'int [][1]'
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(18): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(25): error C2065: 'MAX_ITER': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(29): error C2664: 'bool winDetect(int [][1],int)': cannot convert argument 1 from 'int [h_][w_]' to 'int [][1]'
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(29): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(36): error C2065: 'MAX_ITER': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(40): error C2664: 'bool winDetect(int [][1],int)': cannot convert argument 1 from 'int [h_][w_]' to 'int [][1]'
+         c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\minimax.cpp(40): note: Types pointed to are unrelated; conversion requires reinterpret_cast, C-style cast or function-style cast
+         main.cpp
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(11): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(14): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(17): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(20): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(23): error C2065: 'w_': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(26): error C2065: 'string': undeclared identifier
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(26): error C2146: syntax error: missing ')' before identifier 'str'
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\vs_connect4\con4.h(31): error C2065: 'w_': undeclared identifier
+         Generating Code...
+     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\vs_connect4\vs_connect4.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:02.43
+Time Elapsed 00:00:01.15

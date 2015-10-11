@@ -5,7 +5,7 @@
 
 /*
 
-Things to modify:
+Things to modify:of
 -fix winDetect() (I think it's working now)
 -shallower recursion beginning, allow deeper as game goes on
 -weigh certain situations at certain situations in the game more heavily
