@@ -62,6 +62,8 @@ void Brain::minimax(Board board, int who, int currentCheck, int iter)
 			}
 		}
 	}
+
+	board.NB_delete();
 }
 
 
