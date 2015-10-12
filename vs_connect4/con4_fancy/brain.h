@@ -1,5 +1,3 @@
-#define NOMINMAX
-
 #ifndef _BRAIN
 #define _BRAIN
 

@@ -1,20 +1,22 @@
-﻿Build started 10/11/2015 8:52:27 PM.
-     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_fancy\vs_connect4.vcxproj" on node 2 (Build target(s)).
-     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (vs_connect4.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+﻿Build started 10/12/2015 11:15:07 AM.
+     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\vs_connect4.vcxproj" on node 2 (Build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (vs_connect4 _fancy.vcxproj, vs_connect4.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp board.cpp brain.cpp
-         brain.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt board.cpp brain.cpp main.cpp
          board.cpp
-         main.cpp
          Generating Code...
-     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\board.cpp(231): warning C4715: 'Board::getDisc': not all control paths return a value
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\board.cpp(231): warning C4715: 'Board::getDisc': not all control paths return a value
+         Compiling...
+         main.cpp
+         brain.cpp
+         Generating Code...
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\vs_connect4 _fancy.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\vs_connect4 _fancy.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\vs_connect4 _fancy.lib" /MACHINE:X86 Debug\main.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.lib" /MACHINE:X86 Debug\main.obj
          Debug\board.obj
          Debug\brain.obj
-         vs_connect4.vcxproj -> C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\vs_connect4 _fancy.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_fancy\vs_connect4.vcxproj" (Build target(s)).
+         vs_connect4.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.exe
+     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\vs_connect4.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:03.78
+Time Elapsed 00:00:05.18

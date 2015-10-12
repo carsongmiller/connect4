@@ -15,6 +15,8 @@ Things to modify:of
 -add a chance that the "worse" one is chosen
 -weigh scores better
 
+-minimax heavily favors left side.  fix this
+
 -consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
 -this would be overwritten by logic that makes minimax go shallower at the beginning
 
@@ -36,7 +38,7 @@ const int pDisc = 1, cDisc = 2, nDisc = 0;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-const int MAX_ITER = 6;
+const int MAX_ITER = 8;
 
 
 //Values for SetConsoleTextAttribute()
@@ -66,6 +68,9 @@ bool playMove(int board[][w_], int col, int who);
 //detects if "who" has won
 bool winDetect(int board[][w_], int who);
 
+//detects if "who" is one disc away from winning
+bool nearWinDetect(int board[][w_], int who);
+
 //determines the best move for "who"
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
 
@@ -92,8 +97,10 @@ int main()
 	char whoFirst; //who will go first
 	int moveChoice; //human player's move choice
 	int score[w_]; //stores the scores of each column (handed to minimax())
+	int nextBest[w_]; //stores the scores in rank order
 	int bestScore; //stores the number of the column with the best score
 	char yn; //takes input from player as to whether they want to play again
+	bool placed; //used in ranking the top scores obtained from minimax()
 
 	while (newGame)
 	{
@@ -145,6 +152,9 @@ int main()
 			//reset the score of each column to 0 at the beginning of each turn
 			for (int i = 0; i < w_; i++)
 				score[i] = 0;
+			//reset the rank list of best scores
+			for (int i = 0; i < w_; i++)
+				nextBest[i] = -1;
 
 			cout << "Now its' the computer's turn\n";
 			cout << "\nthinking ...\n\n";
@@ -152,61 +162,90 @@ int main()
 			minimax(board, score, cDisc, cDisc, 0);
 
 
-			cout << endl << endl;
+				cout << endl << endl;
+				
+			//ranking the top scores (gets a bit messy)
 
-			bestScore = 0;
+				nextBest[0] = 0; //creates a base reference for the ranking
 
-			for (int i = 1; i < w_; i++)
-			{
-				if (score[i] > score[bestScore])
-					bestScore = i;
-			}
+				for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
+				{
+					placed = false; //makes sure a column is only ranked once
+					for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
+					{
+						if (score[i] > score[nextBest[n]])
+						{
+							for (int x = w_-1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
+							{
+								nextBest[x] = nextBest[x - 1];
+							}
+
+							nextBest[n] = i;
+							placed = true;
+							break; //again makes sure a column is only ranked once
+						}
+					}
+
+					if (!placed)
+						nextBest[i] = i;
+				}
+				
 
 			//now the computer will make its move
-
-			playMove(board, bestScore, cDisc);
+				for (int i = 0; i < w_; i++)
+				{
+					if (playMove(board, nextBest[i], cDisc))
+						break;
+					else
+						cout << "I think it's a cat's game???";
+				}
 
 			system("cls");
 			cout << "CONNECT 4!\n\n\n";
 
 			//printing the score array for debugging
-			for (int i = 0; i < w_; i++)
-				cout << score[i] << "\t";
+				for (int i = 0; i < w_; i++)
+					cout << score[i] << "\t";
 
 			cout << "\n";
 
 			printBoard(board);
 
-			if (winDetect(board, cDisc))
-			{
-				cout << "\nThe computer wins!\n";
-				break;
-			}
+				if (winDetect(board, cDisc))
+				{
+					cout << "\nThe computer wins!\n";
+					break;
+				}
+
+
+			//debug lines for nearWinDetect()
+				cout << "\n\ncDisc: " << nearWinDetect(board, cDisc) << "\n";
+				cout << "pDisc: " << nearWinDetect(board, pDisc) << "\n";
 
 			//now the player's turn
 			//Player chosing his move
 			validMove = false;
-			while (!validMove)
-			{
-				cout << "Where would you like to go? (enter column number): ";
-				cin >> moveChoice;
+				while (!validMove)
+				{
+					cout << "Where would you like to go? (enter column number): ";
+					cin >> moveChoice;
 
-				if (!playMove(board, moveChoice - 1, pDisc))
-					cout << "There is no space in that column, choose a different one\n";
-				else
-					validMove = true;
-			}
+					if (!playMove(board, moveChoice - 1, pDisc))
+						cout << "There is no space in that column, choose a different one\n";
+					else
+						validMove = true;
+				}
 
 			system("cls");
 			cout << "CONNECT 4!\n\n\n";
 			printBoard(board);
 
 			//detecting a player win	
-			if (winDetect(board, pDisc))
-			{
-				cout << "\nYou win!\n";
-				break;
-			}
+				if (winDetect(board, pDisc))
+				{
+					cout << "\nYou win!\n";
+					break;
+				}
 
 		}
 
@@ -264,7 +303,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 				{
 					if (iter == 1)
 					{
-						score[i] += 500;
+						score[i] -= 1000;
 					}
 					else
 						score[i] -= (MAX_ITER - iter);
@@ -370,6 +409,81 @@ bool winDetect(int board[][w_], int who)
 	}
 
 	return win;
+}
+
+
+
+bool nearWinDetect(int board[][w_], int who)
+{
+	bool nearWin = false;
+
+	//detecting horizontal wins
+	for (int r = h_ - 1; r >= 0; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r][c + 1] == who)
+				{
+					if (board[r][c + 2] == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+
+	//detecting vertical wins
+	for (int c = 0; c < w_; c++) //cycling through all columns
+	{
+		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 4 cells in the same column
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r - 1][c] == who)
+				{
+					if (board[r - 2][c] == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+
+	//detcting diagonal-up wins
+	for (int r = h_ - 1; r > 1; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r - 1][c + 1] == who)
+				{
+					if (board[r - 2][c + 2] == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+	//detecting diagonal-down wins
+	for (int r = 0; r < h_ - 2; r++)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r + 1][c + 1] == who)
+				{
+					if (board[r + 2][c + 2] == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+	return nearWin;
 }
 
 
