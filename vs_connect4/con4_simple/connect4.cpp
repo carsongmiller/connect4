@@ -38,7 +38,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-const int MAX_ITER = 8;
+const int MAX_ITER = 0;
 
 
 //Values for SetConsoleTextAttribute()
@@ -65,6 +65,9 @@ const int WHITE = 15;
 //returns true if move is valid, returns false if not
 bool playMove(int board[][w_], int col, int who);
 
+//deletes the top disc in the given column
+bool unPlayMove(int board[][w_], int col);
+
 //detects if "who" has won
 bool winDetect(int board[][w_], int who);
 
@@ -88,6 +91,9 @@ void printColor(char c, int color);
 //returns an appropriate symbol for the given index when given the board
 char getChar(int board[][w_], int r, int c);
 
+//ranks the scores of columns
+void rankScores(int score[], int rankedScore[]);
+
 
 
 int main()
@@ -97,10 +103,9 @@ int main()
 	char whoFirst; //who will go first
 	int moveChoice; //human player's move choice
 	int score[w_]; //stores the scores of each column (handed to minimax())
-	int nextBest[w_]; //stores the scores in rank order
+	int rankedScore[w_]; //stores the scores in rank order
 	int bestScore; //stores the number of the column with the best score
 	char yn; //takes input from player as to whether they want to play again
-	bool placed; //used in ranking the top scores obtained from minimax()
 
 	while (newGame)
 	{
@@ -154,7 +159,7 @@ int main()
 				score[i] = 0;
 			//reset the rank list of best scores
 			for (int i = 0; i < w_; i++)
-				nextBest[i] = -1;
+				rankedScore[i] = -1;
 
 			cout << "Now its' the computer's turn\n";
 			cout << "\nthinking ...\n\n";
@@ -163,38 +168,12 @@ int main()
 
 
 				cout << endl << endl;
-				
-			//ranking the top scores (gets a bit messy)
-
-				nextBest[0] = 0; //creates a base reference for the ranking
-
-				for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
-				{
-					placed = false; //makes sure a column is only ranked once
-					for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
-					{
-						if (score[i] > score[nextBest[n]])
-						{
-							for (int x = w_-1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
-							{
-								nextBest[x] = nextBest[x - 1];
-							}
-
-							nextBest[n] = i;
-							placed = true;
-							break; //again makes sure a column is only ranked once
-						}
-					}
-
-					if (!placed)
-						nextBest[i] = i;
-				}
-				
+								
 
 			//now the computer will make its move
 				for (int i = 0; i < w_; i++)
 				{
-					if (playMove(board, nextBest[i], cDisc))
+					if (playMove(board, rankedScore[i], cDisc))
 						break;
 					else
 						cout << "I think it's a cat's game???";
@@ -262,18 +241,37 @@ int main()
 
 bool playMove(int board[][w_], int col, int who)
 {
-	bool open = false;
 	for (int i = h_ - 1; i >= 0; i--)
 	{
 		if (board[i][col] == nDisc)
 		{
-			open = true;
 			board[i][col] = who;
-			break;
+			return true;
 		}
 	}
 
-	return open;
+	return false;
+}
+
+
+
+bool unPlayMove(int board[][w_], int col)
+{
+	for (int i = h_ - 1; i > 0; i++)
+	{
+		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
+		{
+			board[i][col] = 0;
+			return true;
+		}
+		else if (i == 1 && board[0][col] != nDisc)
+		{
+			board[0][col] = nDisc;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -282,6 +280,8 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 {
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
+
+	printBoard(newBoard); //debug
 
 	int nearWinP;
 
@@ -293,7 +293,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 			{
 				if (iter == 0)
 				{
-					nearWinP = nearWinDetect(board, pDisc);
+					nearWinP = nearWinDetect(newBoard, pDisc);
 					if (nearWinP != -1)
 						score[nearWinP] += 1000000;
 				}
@@ -311,6 +311,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 
 				else if (winDetect(newBoard, pDisc))
 				{
+					printBoard(newBoard); //debug
 					if (iter == 1)
 					{
 						score[i] -= 1000;
@@ -423,82 +424,8 @@ bool winDetect(int board[][w_], int who)
 
 
 
-/*bool nearWinDetect(int board[][w_], int who)
-{
-	bool nearWin = false;
 
-	//detecting horizontal wins
-	for (int r = h_ - 1; r >= 0; r--)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r][c + 1] == who)
-				{
-					if (board[r][c + 2] == who)
-						nearWin = true;
-				}
-			}
-		}
-	}
-
-
-	//detecting vertical wins
-	for (int c = 0; c < w_; c++) //cycling through all columns
-	{
-		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 4 cells in the same column
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r - 1][c] == who)
-				{
-					if (board[r - 2][c] == who)
-						nearWin = true;
-				}
-			}
-		}
-	}
-
-
-	//detcting diagonal-up wins
-	for (int r = h_ - 1; r > 1; r--)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r - 1][c + 1] == who)
-				{
-					if (board[r - 2][c + 2] == who)
-						nearWin = true;
-				}
-			}
-		}
-	}
-
-	//detecting diagonal-down wins
-	for (int r = 0; r < h_ - 2; r++)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r + 1][c + 1] == who)
-				{
-					if (board[r + 2][c + 2] == who)
-						nearWin = true;
-				}
-			}
-		}
-	}
-
-	return nearWin;
-}*/
-
-
-
-int nearWinDetect(int board[][w_], int who)
+/*int nearWinDetect(int board[][w_], int who)
 {
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
@@ -585,6 +512,34 @@ int nearWinDetect(int board[][w_], int who)
 					}
 				}
 			}
+		}
+	}
+
+	return -1;
+}*/
+
+
+
+int nearWinDetect(int board[][w_], int who)
+{
+	int col = -1;
+
+	for (int i = 0; i < w_; i++)
+	{
+		playMove(board, i, who);
+		//printBoard(board);
+
+		if (winDetect(board, who))
+		{
+			unPlayMove(board, i);
+			//printBoard(board);
+			return i;
+		}
+
+		else
+		{
+			unPlayMove(board, i);
+			//printBoard(board);
 		}
 	}
 
@@ -703,4 +658,36 @@ void printColor(char c, int color)
 	SetConsoleTextAttribute(H, color);
 	cout << c;
 	SetConsoleTextAttribute(H, WHITE);
+}
+
+
+
+
+void rankScores(int score[], int rankedScore[])
+{
+	bool placed;
+
+	rankedScore[0] = 0; //creates a base reference for the ranking
+
+	for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
+	{
+		placed = false; //makes sure a column is only ranked once
+		for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
+		{
+			if (score[i] > score[rankedScore[n]])
+			{
+				for (int x = w_ - 1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
+				{
+					rankedScore[x] = rankedScore[x - 1];
+				}
+
+				rankedScore[n] = i;
+				placed = true;
+				break; //again makes sure a column is only ranked once
+			}
+		}
+
+		if (!placed)
+			rankedScore[i] = i;
+	}
 }
