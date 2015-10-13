@@ -82,6 +82,24 @@ bool Board::playMove(int col, int who)
 
 
 
+bool Board::playMove_NB(int col, int who)
+{
+	bool open = false;
+	for (int i = h_ - 1; i >= 0; i--)
+	{
+		if (newBoard[i][col] == 0)
+		{
+			open = true;
+			newBoard[i][col] = who;
+			break;
+		}
+	}
+
+	return open;
+}
+
+
+
 //Following code is pretty messy, but it works and makes a nice print out
 
 void Board::printBoard()

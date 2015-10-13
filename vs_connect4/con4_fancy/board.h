@@ -50,8 +50,11 @@ public:
 	//copy constructor
 	Board(Board& old);
 
-	//returns true if move is valid, returns false if not
+	//returns true if move is valid, returns false if not (uses **board)
 	bool playMove(int col, int who);
+
+	//returns true if move is valid, returns false if not (uses **newBoard)
+	bool playMove_NB(int col, int who);
 
 	//prints the board
 	void printBoard();

@@ -81,25 +81,25 @@ int main()
 			//reset the score of each column to 0 at the beginning of each turn
 			brain.scoreReset();
 
-			cout << "Now its' the computer's turn\n";
-			cout << "\nthinking ...\n\n";
+			cout << "Now its' the computer's turn\n\n";
+			cout << "thinking ...\n\n";
 
 			brain.minimax(board, board.getDisc('c'), board.getDisc('c'), 0);
 
 
 			cout << endl << endl;
 
-			bestScore = 0;
-
-			for (int i = 1; i < w_; i++)
-			{
-				if (brain.getScore(i) > brain.getScore(bestScore))
-					bestScore = i;
-			}
+				brain.rankScoreReset();
+				brain.rankScores();
 
 			//now the computer will make its move
 
-			board.playMove(bestScore, board.getDisc('c'));
+				for (int i = 0; i < w_; i++)
+				{
+					if (board.playMove(bestScore, board.getDisc('c')))
+						break;
+				}
+
 
 			system("cls");
 			cout << "CONNECT 4!\n\n\n";
@@ -112,11 +112,8 @@ int main()
 
 			board.printBoard();
 
-			if (brain.winDetect(board, board.getDisc('c')))
-			{
-				cout << "\nThe computer wins!\n";
-				break;
-			}
+				if (brain.winDetect(board, board.getDisc('c')))
+					cout << "\nThe computer wins!\n";
 
 			//now the player's turn
 			//Player chosing his move

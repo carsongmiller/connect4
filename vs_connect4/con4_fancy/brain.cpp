@@ -12,6 +12,11 @@ Brain::Brain(int max, int w, int h)
 	for (int i = 0; i < w; i++)
 		score[i] = 0;
 
+	score_ranked = new int[w];
+
+	for (int i = 0; i < w; i++)
+		score_ranked[i] = 0;
+
 	w_ = w;
 	h_ = h;
 }
@@ -26,9 +31,9 @@ void Brain::minimax(Board board, int who, int currentCheck, int iter)
 	{
 		for (int i = 0; i < w_; i++)
 		{
-			if (board.playMove(i, currentCheck))
+			if (board.playMove_NB(i, currentCheck))
 			{
-				if (winDetect(board, board.getDisc('c')))
+				if (winDetect_NB(board, board.getDisc('c')))
 				{
 					if (iter == 0)
 					{
@@ -39,7 +44,7 @@ void Brain::minimax(Board board, int who, int currentCheck, int iter)
 				}
 
 
-				else if (winDetect(board, board.getDisc('p')))
+				else if (winDetect_NB(board, board.getDisc('p')))
 				{
 					if (iter == 1)
 					{
@@ -50,7 +55,7 @@ void Brain::minimax(Board board, int who, int currentCheck, int iter)
 				}
 
 
-				else if (!winDetect(board, board.getDisc('c')) && !winDetect(board, board.getDisc('p')))
+				else if (!winDetect_NB(board, board.getDisc('c')) && !winDetect_NB(board, board.getDisc('p')))
 				{
 					if (currentCheck == board.getDisc('p'))
 						currentCheck = board.getDisc('c');
@@ -155,6 +160,168 @@ bool Brain::winDetect(Board board, int who)
 
 
 
+bool Brain::winDetect_NB(Board board, int who)
+{
+	bool win = false;
+
+	//detecting horizontal wins
+	for (int r = h_ - 1; r >= 0; r--)
+	{
+		for (int c = 0; c < w_ - 3; c++)
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r, c + 1) == who)
+				{
+					if (board.getCell_NB(r, c + 2) == who)
+					{
+						if (board.getCell_NB(r, c + 3) == who)
+							win = true;
+					}
+				}
+			}
+		}
+	}
+
+
+	//detecting vertical wins
+	for (int c = 0; c < w_; c++) //cycling through all columns
+	{
+		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 4 cells in the same column
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r - 1, c) == who)
+				{
+					if (board.getCell_NB(r - 2, c) == who)
+					{
+						if (board.getCell_NB(r - 3, c) == who)
+							win = true;
+					}
+				}
+			}
+		}
+	}
+
+
+	//detcting diagonal-up wins
+	for (int r = h_ - 1; r > 2; r--)
+	{
+		for (int c = 0; c < w_ - 3; c++)
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r - 1, c + 1) == who)
+				{
+					if (board.getCell_NB(r - 2, c + 2) == who)
+					{
+						if (board.getCell_NB(r - 3, c + 3) == who)
+							win = true;
+					}
+				}
+			}
+		}
+	}
+
+	//detecting diagonal-down wins
+	for (int r = 0; r < h_ - 3; r++)
+	{
+		for (int c = 0; c < w_ - 3; c++)
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r + 1, c + 1) == who)
+				{
+					if (board.getCell_NB(r + 2, c + 2) == who)
+					{
+						if (board.getCell_NB(r + 3, c + 3) == who)
+							win = true;
+					}
+				}
+			}
+		}
+	}
+
+	return win;
+}
+
+
+
+int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to be used with board[][])
+{
+	int nearWin = -1;
+
+	//detecting horizontal wins
+	for (int r = h_ - 1; r >= 0; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r, c+1) == who)
+				{
+					if (board.getCell_NB(r, c+2) == who)
+						
+				}
+			}
+		}
+	}
+
+
+	//detecting vertical wins
+	for (int c = 0; c < w_; c++) //cycling through all columns
+	{
+		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 3 cells in the same column
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r-1, c) == who)
+				{
+					if (board.getCell_NB(r-2, c) == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+
+	//detcting diagonal-up wins
+	for (int r = h_ - 1; r > 1; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board.getCell_NB(r-1, c+1) == who)
+			{
+				if (board.getCell_NB(r-2, c+2) == who)
+				{
+					if (board.getCell_NB(r-2, c+2) == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+	//detecting diagonal-down wins
+	for (int r = 0; r < h_ - 2; r++)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board.getCell_NB(r, c) == who)
+			{
+				if (board.getCell_NB(r+1, c+1) == who)
+				{
+					if (board.getCell_NB(r+2, c+2) == who)
+						nearWin = true;
+				}
+			}
+		}
+	}
+
+	return nearWin;
+}
+
+
+
 void Brain::scoreReset()
 {
 	for (int i = 0; i < w_; i++)
@@ -166,4 +333,44 @@ void Brain::scoreReset()
 int Brain::getScore(int col)
 {
 	return score[col];
+}
+
+
+
+void Brain::rankScores()
+{
+	for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
+	{
+		placed = false; //makes sure a column is only ranked once
+		for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
+		{
+			if (score[i] > score[score_ranked[n]])
+			{
+				for (int x = w_ - 1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
+				{
+					score_ranked[x] = score_ranked[x - 1];
+				}
+
+				score_ranked[n] = i;
+				placed = true;
+				break; //again makes sure a column is only ranked once
+			}
+		}
+
+		if (!placed)
+			score_ranked[i] = i;
+	}
+}
+
+void Brain::rankScoreReset()
+{
+	for (int i = 0; i < w_; i++)
+		score_ranked[i] = -1;
+}
+
+
+
+int Brain::getRankScore(int rank)
+{
+	return score_ranked[rank];
 }
