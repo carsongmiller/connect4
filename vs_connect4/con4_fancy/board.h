@@ -19,7 +19,7 @@ private:
 	int** newBoard;
 	
 	//pDisc =  disc; cDisc = computer disc; nDisc = no disc
-	const int nDisc = 0, pDisc = 1, cDisc = 2;
+	const int nDisc = -1, pDisc = 1, cDisc = 2;
 	//width and height variables
 	int w_, h_;
 

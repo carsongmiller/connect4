@@ -32,7 +32,6 @@ int main()
 	bool cont = true, validMove, newGame = true; //determines whether the game should continue
 	char whoFirst; //who will go first
 	int moveChoice; //human player's move choice
-	int bestScore; //stores the number of the column with the best score
 	char yn; //takes input from player as to whether they want to play again
 
 	int w_ = 7, h_ = 6;
@@ -80,6 +79,7 @@ int main()
 		{
 			//reset the score of each column to 0 at the beginning of each turn
 			brain.scoreReset();
+			brain.rankScoreReset();
 
 			cout << "Now its' the computer's turn\n\n";
 			cout << "thinking ...\n\n";
@@ -96,7 +96,7 @@ int main()
 
 				for (int i = 0; i < w_; i++)
 				{
-					if (board.playMove(bestScore, board.getDisc('c')))
+					if (board.playMove(brain.getRankScore(i), board.getDisc('c')))
 						break;
 				}
 
@@ -105,8 +105,8 @@ int main()
 			cout << "CONNECT 4!\n\n\n";
 
 			//printing the score array for debugging
-			for (int i = 0; i < w_; i++)
-				cout << brain.getScore(i) << "\t";
+				for (int i = 0; i < w_; i++)
+					cout << brain.getScore(i) << "\t";
 
 			cout << "\n";
 
@@ -115,19 +115,21 @@ int main()
 				if (brain.winDetect(board, board.getDisc('c')))
 					cout << "\nThe computer wins!\n";
 
+
 			//now the player's turn
 			//Player chosing his move
-			validMove = false;
-			while (!validMove)
-			{
-				cout << "Where would you like to go? (enter column number): ";
-				cin >> moveChoice;
+				validMove = false;
+				while (!validMove)
+				{
+					cout << "Where would you like to go? (enter column number): ";
+					cin >> moveChoice;
 
-				if (!board.playMove(moveChoice - 1, board.getDisc('p')))
-					cout << "There is no space in that column, choose a different one\n";
-				else
-					validMove = true;
-			}
+					if (!board.playMove(moveChoice - 1, board.getDisc('p')))
+						cout << "There is no space in that column, choose a different one\n";
+					else
+						validMove = true;
+				}
+
 
 			system("cls");
 			cout << "CONNECT 4!\n\n\n";

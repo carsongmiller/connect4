@@ -246,6 +246,11 @@ int Board::getDisc(char c)
 		return pDisc;
 	else if (c == 'c')
 		return cDisc;
+	else
+	{
+		cout << "Error: invalid character given to Board::getDisc()\n";
+		exit(1);
+	}
 }
 
 
@@ -269,6 +274,14 @@ void Board::createNewBoard()
 	newBoard = new int*[h_];
 	for (int i = 0; i < h_; i++)
 		newBoard[i] = new int[w_];
+
+	for (int r = 0; r < h_; r++)
+	{
+		for (int c = 0; c < w_; c++)
+		{
+			newBoard[r][c] = board[r][c];
+		}
+	}
 }
 
 

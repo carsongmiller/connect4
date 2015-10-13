@@ -75,8 +75,6 @@ void Brain::minimax(Board board, int who, int currentCheck, int iter)
 
 bool Brain::winDetect(Board board, int who)
 {
-	bool win = false;
-
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
 	{
@@ -89,7 +87,7 @@ bool Brain::winDetect(Board board, int who)
 					if (board.getCell(r, c+2) == who)
 					{
 						if (board.getCell(r, c+3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -109,7 +107,7 @@ bool Brain::winDetect(Board board, int who)
 					if (board.getCell(r-2, c) == who)
 					{
 						if (board.getCell(r-3, c) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -129,7 +127,7 @@ bool Brain::winDetect(Board board, int who)
 					if (board.getCell(r-2, c+2) == who)
 					{
 						if (board.getCell(r-3, c+3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -148,22 +146,20 @@ bool Brain::winDetect(Board board, int who)
 					if (board.getCell(r+2, c+2) == who)
 					{
 						if (board.getCell(r+3, c+3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
 		}
 	}
 
-	return win;
+	return false;
 }
 
 
 
 bool Brain::winDetect_NB(Board board, int who)
 {
-	bool win = false;
-
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
 	{
@@ -176,7 +172,7 @@ bool Brain::winDetect_NB(Board board, int who)
 					if (board.getCell_NB(r, c + 2) == who)
 					{
 						if (board.getCell_NB(r, c + 3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -196,7 +192,7 @@ bool Brain::winDetect_NB(Board board, int who)
 					if (board.getCell_NB(r - 2, c) == who)
 					{
 						if (board.getCell_NB(r - 3, c) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -216,7 +212,7 @@ bool Brain::winDetect_NB(Board board, int who)
 					if (board.getCell_NB(r - 2, c + 2) == who)
 					{
 						if (board.getCell_NB(r - 3, c + 3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
@@ -235,22 +231,20 @@ bool Brain::winDetect_NB(Board board, int who)
 					if (board.getCell_NB(r + 2, c + 2) == who)
 					{
 						if (board.getCell_NB(r + 3, c + 3) == who)
-							win = true;
+							return true;
 					}
 				}
 			}
 		}
 	}
 
-	return win;
+	return false;
 }
 
 
 
 int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to be used with board[][])
 {
-	int nearWin = -1;
-
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
 	{
@@ -260,8 +254,14 @@ int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to b
 			{
 				if (board.getCell_NB(r, c+1) == who)
 				{
-					if (board.getCell_NB(r, c+2) == who)
-						
+					if (board.getCell_NB(r, c + 2) == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board.getCell_NB(r, c + 3) == board.getDisc('n') && board.getCell_NB(r + 1, c + 3) != board.getDisc('n'))
+							return c + 3;
+						else if (board.getCell_NB(r, c - 1) == board.getDisc('n') && board.getCell_NB(r + 1, c - 1) != board.getDisc('n'))
+							return c - 1;
+					}
 				}
 			}
 		}
@@ -277,8 +277,12 @@ int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to b
 			{
 				if (board.getCell_NB(r-1, c) == who)
 				{
-					if (board.getCell_NB(r-2, c) == who)
-						nearWin = true;
+					if (board.getCell_NB(r - 2, c) == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board.getCell_NB(r - 3, c) == board.getDisc('n'))
+							return c;
+					}
 				}
 			}
 		}
@@ -290,12 +294,18 @@ int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to b
 	{
 		for (int c = 0; c < w_ - 2; c++)
 		{
-			if (board.getCell_NB(r-1, c+1) == who)
+			if (board.getCell_NB(r, c) == who)
 			{
-				if (board.getCell_NB(r-2, c+2) == who)
+				if (board.getCell_NB(r-1, c+1) == who)
 				{
-					if (board.getCell_NB(r-2, c+2) == who)
-						nearWin = true;
+					if (board.getCell_NB(r - 2, c + 2) == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board.getCell_NB(r-3, c + 3) == board.getDisc('n') && board.getCell_NB(r - 2, c + 3) != board.getDisc('n'))
+							return c + 3;
+						else if (board.getCell_NB(r + 1, c - 1) == board.getDisc('n') && board.getCell_NB(r + 2, c - 1) != board.getDisc('n'))
+							return c - 1;
+					}
 				}
 			}
 		}
@@ -310,14 +320,20 @@ int Brain::nearWinDetect(Board board, int who) //uses newBoard[][] (no need to b
 			{
 				if (board.getCell_NB(r+1, c+1) == who)
 				{
-					if (board.getCell_NB(r+2, c+2) == who)
-						nearWin = true;
+					if (board.getCell_NB(r + 2, c + 2) == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board.getCell_NB(r - 1, c - 1) == board.getDisc('n') && board.getCell_NB(r, c - 1) != board.getDisc('n'))
+							return c - 1;
+						else if (board.getCell_NB(r +3 , c + 3) == board.getDisc('n') && board.getCell_NB(r + 4, c + 3) != board.getDisc('n'))
+							return c + 3;
+					}
 				}
 			}
 		}
 	}
 
-	return nearWin;
+	return -1;
 }
 
 

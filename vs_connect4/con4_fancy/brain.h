@@ -18,6 +18,9 @@ private:
 	int h_, w_;
 	bool placed;
 
+	//pointer to be used in minimax
+	int** newBoard;
+
 public:
 	//Constructors
 	Brain(int max, int w, int h);
@@ -28,7 +31,7 @@ public:
 	//detects if "who" has won in newBoard[][]
 	bool winDetect_NB(Board board, int who);
 
-	//detects if "who" can win in one more move and returns where to play to block in board[][]
+	//detects if "who" can win in one more move and returns where to play to block in newBoard[][]
 	int nearWinDetect(Board board, int who);
 
 	//determines the best move for "who"

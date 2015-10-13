@@ -34,7 +34,7 @@ using namespace std;
 
 
 //pDisc =  disc; cDisc = computer disc; nDisc = no disc
-const int pDisc = 1, cDisc = 2, nDisc = 0;
+const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
@@ -69,7 +69,7 @@ bool playMove(int board[][w_], int col, int who);
 bool winDetect(int board[][w_], int who);
 
 //detects if "who" is one disc away from winning
-bool nearWinDetect(int board[][w_], int who);
+int nearWinDetect(int board[][w_], int who);
 
 //determines the best move for "who"
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
@@ -265,7 +265,7 @@ bool playMove(int board[][w_], int col, int who)
 	bool open = false;
 	for (int i = h_ - 1; i >= 0; i--)
 	{
-		if (board[i][col] == 0)
+		if (board[i][col] == nDisc)
 		{
 			open = true;
 			board[i][col] = who;
@@ -282,12 +282,22 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 {
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
+
+	int nearWinP;
+
 	if (iter <= MAX_ITER)
 	{
 		for (int i = 0; i < w_; i++)
 		{
 			if (playMove(newBoard, i, currentCheck))
 			{
+				if (iter == 0)
+				{
+					nearWinP = nearWinDetect(board, pDisc);
+					if (nearWinP != -1)
+						score[nearWinP] += 1000000;
+				}
+				
 				if (winDetect(newBoard, cDisc))
 				{
 					if (iter == 0)
@@ -413,7 +423,7 @@ bool winDetect(int board[][w_], int who)
 
 
 
-bool nearWinDetect(int board[][w_], int who)
+/*bool nearWinDetect(int board[][w_], int who)
 {
 	bool nearWin = false;
 
@@ -484,6 +494,101 @@ bool nearWinDetect(int board[][w_], int who)
 	}
 
 	return nearWin;
+}*/
+
+
+
+int nearWinDetect(int board[][w_], int who)
+{
+	//detecting horizontal wins
+	for (int r = h_ - 1; r >= 0; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r][c + 1] == who)
+				{
+					if (board[r][c + 2] == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board[r][c + 3] == nDisc && board[r + 1][c + 3] != nDisc)
+							return c + 3;
+						else if (board[r][c - 1] == nDisc && board[r + 1][c - 1] != nDisc)
+							return c - 1;
+					}
+				}
+			}
+		}
+	}
+
+
+	//detecting vertical wins
+	for (int c = 0; c < w_; c++) //cycling through all columns
+	{
+		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 3 cells in the same column
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r - 1][c] == who)
+				{
+					if (board[r - 2][c] == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board[r - 3][c] == nDisc)
+							return c;
+					}
+				}
+			}
+		}
+	}
+
+
+	//detcting diagonal-up wins
+	for (int r = h_ - 1; r > 1; r--)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r - 1][c + 1] == who)
+				{
+					if (board[r - 2][c + 2] == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board[r - 3][c + 3] == nDisc && board[r - 2][c + 3] != nDisc)
+							return c + 3;
+						else if (board[r + 1][c - 1] == nDisc && board[r + 2][c - 1] != nDisc)
+							return c - 1;
+					}
+				}
+			}
+		}
+	}
+
+	//detecting diagonal-down wins
+	for (int r = 0; r < h_ - 2; r++)
+	{
+		for (int c = 0; c < w_ - 2; c++)
+		{
+			if (board[r][c] == who)
+			{
+				if (board[r + 1][c + 1] == who)
+				{
+					if (board[r + 2][c + 2] == who)
+					{
+						//making sure the winning spot is available & possible
+						if (board[r - 1][c - 1] == nDisc && board[r][c - 1] != nDisc)
+							return c - 1;
+						else if (board[r + 3][c + 3] == nDisc && board[r + 4][c + 3] != nDisc)
+							return c + 3;
+					}
+				}
+			}
+		}
+	}
+
+	return -1;
 }
 
 
@@ -524,11 +629,11 @@ void printBoard(int board[][w_])
 		for (int c = 0; c < w_; c++)
 		{
 			//decide which disc to print
-			if (board[r][c] == 0)
+			if (board[r][c] == nDisc)
 				cout << getChar(board, r, c);
-			else if (board[r][c] == 1)
+			else if (board[r][c] == pDisc)
 				printColor(getChar(board, r, c), LIGHTRED);
-			else if (board[r][c] == 2)
+			else if (board[r][c] == cDisc)
 				printColor(getChar(board, r, c), LIGHTBLUE);
 
 			cout << "   |   ";
@@ -554,10 +659,14 @@ void printBoard(int board[][w_])
 
 char getChar(int board[][w_], int r, int c)
 {
-	if (board[r][c] == 0)
+	if (board[r][c] == nDisc)
 		return ' ';
-	else if (board[r][c] == 1 || board[r][c] == 2)
+
+	else if (board[r][c] == pDisc || board[r][c] == cDisc)
 		return 'O';
+
+	else
+		return 'X'; //something went wrong
 }
 
 
