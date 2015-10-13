@@ -38,7 +38,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-const int MAX_ITER = 0;
+const int MAX_ITER = 4;
 
 
 //Values for SetConsoleTextAttribute()
@@ -63,16 +63,26 @@ const int WHITE = 15;
 
 
 //returns true if move is valid, returns false if not
-bool playMove(int board[][w_], int col, int who);
+int playMove(int board[][w_], int col, int who);
 
 //deletes the top disc in the given column
 bool unPlayMove(int board[][w_], int col);
 
+//returns how many winning arrangements (combinations) the given cell is involved in
+int numWinComb(int board[][w_], int r, int c);
+
+//constructs 3D array of [row][column][comb#] = (string)comb
+void makeCombTable(string *** combTable, int board[][w_]);
+
 //detects if "who" has won
-bool winDetect(int board[][w_], int who);
+//bool winDetectOLD(int board[][w_], int who);
+
+//detects if the disc at board[r][c] has won
+bool winDetect(int board[][w_], int r, int c);
 
 //detects if "who" is one disc away from winning
-int nearWinDetect(int board[][w_], int who);
+int nearWinDetectA(int board[][w_], int who);
+int nearWinDetectB(int board[][w_], int who);
 
 //determines the best move for "who"
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
@@ -94,6 +104,15 @@ char getChar(int board[][w_], int r, int c);
 //ranks the scores of columns
 void rankScores(int score[], int rankedScore[]);
 
+//prints the score[] array (mostly for debugging)
+void printScore(int score[]);
+
+//resets the score[] array
+void scoreReset(int score[]);
+
+//resets the rankedScore[] array
+void rankedScoreReset(int rankedScore[]);
+
 
 
 int main()
@@ -106,6 +125,9 @@ int main()
 	int rankedScore[w_]; //stores the scores in rank order
 	int bestScore; //stores the number of the column with the best score
 	char yn; //takes input from player as to whether they want to play again
+	int rowPlayed; //stores the row in which the last disc was played
+	int colPlayed; //stores the column in which the last disc was played
+	//string *** combTable;
 
 	while (newGame)
 	{
@@ -154,17 +176,15 @@ int main()
 
 		while (cont)
 		{
-			//reset the score of each column to 0 at the beginning of each turn
-			for (int i = 0; i < w_; i++)
-				score[i] = 0;
-			//reset the rank list of best scores
-			for (int i = 0; i < w_; i++)
-				rankedScore[i] = -1;
+			scoreReset(score);
+			rankedScoreReset(rankedScore);
 
 			cout << "Now its' the computer's turn\n";
 			cout << "\nthinking ...\n\n";
 
 			minimax(board, score, cDisc, cDisc, 0);
+
+			rankScores(score, rankedScore);
 
 
 				cout << endl << endl;
@@ -173,24 +193,22 @@ int main()
 			//now the computer will make its move
 				for (int i = 0; i < w_; i++)
 				{
-					if (playMove(board, rankedScore[i], cDisc))
+					rowPlayed = playMove(board, rankedScore[i], cDisc);
+					if (rowPlayed != -1)
+					{
+						colPlayed = rankedScore[i];
 						break;
-					else
-						cout << "I think it's a cat's game???";
+					}
 				}
 
 			system("cls");
-			cout << "CONNECT 4!\n\n\n";
+			cout << "\nCONNECT 4!\n\n";
 
-			//printing the score array for debugging
-				for (int i = 0; i < w_; i++)
-					cout << score[i] << "\t";
-
-			cout << "\n";
+			printScore(score); //print the score[] array
 
 			printBoard(board);
 
-				if (winDetect(board, cDisc))
+				if (winDetect(board, rowPlayed, colPlayed))
 				{
 					cout << "\nThe computer wins!\n";
 					break;
@@ -198,8 +216,8 @@ int main()
 
 
 			//debug lines for nearWinDetect()
-				cout << "\n\ncDisc: " << nearWinDetect(board, cDisc) << "\n";
-				cout << "pDisc: " << nearWinDetect(board, pDisc) << "\n";
+				//cout << "\n\ncDisc: " << nearWinDetect(board, cDisc) << "\n";
+				//cout << "pDisc: " << nearWinDetect(board, pDisc) << "\n";
 
 			//now the player's turn
 			//Player chosing his move
@@ -209,7 +227,9 @@ int main()
 					cout << "Where would you like to go? (enter column number): ";
 					cin >> moveChoice;
 
-					if (!playMove(board, moveChoice - 1, pDisc))
+					rowPlayed = playMove(board, moveChoice - 1, pDisc);
+
+					if (rowPlayed == -1)
 						cout << "There is no space in that column, choose a different one\n";
 					else
 						validMove = true;
@@ -220,7 +240,7 @@ int main()
 			printBoard(board);
 
 			//detecting a player win	
-				if (winDetect(board, pDisc))
+				if (winDetect(board, rowPlayed, moveChoice - 1))
 				{
 					cout << "\nYou win!\n";
 					break;
@@ -239,18 +259,18 @@ int main()
 
 
 
-bool playMove(int board[][w_], int col, int who)
+int playMove(int board[][w_], int col, int who)
 {
 	for (int i = h_ - 1; i >= 0; i--)
 	{
 		if (board[i][col] == nDisc)
 		{
 			board[i][col] = who;
-			return true;
+			return i;
 		}
 	}
 
-	return false;
+	return -1;
 }
 
 
@@ -281,24 +301,27 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
 
-	printBoard(newBoard); //debug
+	//printBoard(newBoard); //debug
 
 	int nearWinP;
+	int rowPlayed;
 
 	if (iter <= MAX_ITER)
 	{
 		for (int i = 0; i < w_; i++)
 		{
-			if (playMove(newBoard, i, currentCheck))
+			rowPlayed = playMove(newBoard, i, currentCheck);
+
+			if (rowPlayed != -1)
 			{
-				if (iter == 0)
+				/*if (iter == 0)
 				{
-					nearWinP = nearWinDetect(newBoard, pDisc);
+					nearWinP = nearWinDetectA(newBoard, pDisc);
 					if (nearWinP != -1)
 						score[nearWinP] += 1000000;
-				}
+				}*/
 				
-				if (winDetect(newBoard, cDisc))
+				if (winDetect(newBoard, rowPlayed, i))
 				{
 					if (iter == 0)
 					{
@@ -309,9 +332,9 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 				}
 
 
-				else if (winDetect(newBoard, pDisc))
+				else if (winDetect(newBoard, rowPlayed, i))
 				{
-					printBoard(newBoard); //debug
+					//printBoard(newBoard); //debug
 					if (iter == 1)
 					{
 						score[i] -= 1000;
@@ -321,7 +344,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 				}
 
 
-				else if (!winDetect(newBoard, cDisc) && !winDetect(newBoard, pDisc))
+				else if (!winDetect(newBoard, rowPlayed, i) && !winDetect(newBoard, rowPlayed, i))
 				{
 					if (currentCheck == cDisc)
 						currentCheck = pDisc;
@@ -337,7 +360,168 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 
 
 
-bool winDetect(int board[][w_], int who)
+/*int numWinComb(int board[][w_], int r, int c)
+{
+	int neighbor = 0;
+
+		for (int i = 1; i <= 3; i++)
+		{
+			if (board[r + i][c] == nDisc) //straight right
+				neighbor++;
+			if (board[r - i][c] == nDisc) //straight left
+				neighbor++;
+			if (board[r][c + i] == nDisc) //straight up
+				neighbor++;
+			if (board[r][c - i] == nDisc) //straight down
+				neighbor++;
+			if (board[r + i][c + i] == nDisc) //diagonal up right
+				neighbor++;
+			if (board[r - i][c + i] == nDisc) //diagonal down right
+				neighbor++;
+			if (board[r - i][c - i] == nDisc) // diagonal down left
+				neighbor++;
+			if (board[r + i][c - i] == nDisc) // diagonal up left
+				neighbor++;
+		}
+
+		return (neighbor - 8);
+}*/
+
+
+
+/*void makeCombTable(string *** combTable, int board[][w_])
+{
+	//assign tripple pointer to array
+		combTable = new string**[h_];
+		for (int i = 0; i < h_; i++)
+		{
+			combTable[i] = new string*[w_];
+
+			for (int j = 0; j < w_; j++)
+				combTable[i][j] = new string[numWinComb(board, i, j)];
+		}
+
+	//initialize array to all 3's ()
+		for (int i = 0; i < h_; i++)
+		{
+			for (int j = 0; j < w_; j++)
+			{
+				for (int k = 0; k < numWinComb(board, i, j); k++)
+					combTable[i][j][k] = 
+			}
+		}
+}*/
+
+
+// not having bound detection makes this a lot tougher ...
+
+bool winDetect(int board[][w_], int r, int c)
+{
+	int who = board[r][c];
+	bool win = false;
+	int consec;
+
+	//straight left
+		consec = 0;
+		for (int i = 0; i < 3; i++) 
+		{
+			if (c - i >= 0 && board[r][c-i] == who)
+				consec++;
+			else
+				break;
+		}
+
+		if (consec == 3)
+			return true;
+
+	//straight right
+		consec = 0;
+		for (int i = 0; i < 3; i++) 
+		{
+			if (c + i < w_ && board[r][c + i] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//diagonal up left
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (c - i >= 0 && r - i >= 0 && board[r - i][c - i] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//diagonal up right
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (c + i < w_ && r - i >= 0 && board[r - i][c + i] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//diagonal down left
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (c - i >= 0 && r + i < h_ && board[r + i][c - i] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//diagonal down right
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (c + i < w_ && r + i < h_ && board[r + i][c + i] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//straight up
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (r - i >= 0 && board[r - i][c] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+
+	//straight down
+		consec = 0;
+		for (int i = 0; i < 3; i++)
+		{
+			if (r + i < h_ && board[r + i][c] == who)
+				consec++;
+			else
+				break;
+		}
+		if (consec == 3)
+			return true;
+}
+
+
+
+/*bool winDetectOLD(int board[][w_], int who)
 {
 	bool win = false;
 
@@ -420,12 +604,12 @@ bool winDetect(int board[][w_], int who)
 	}
 
 	return win;
-}
+}*/
 
 
 
 
-/*int nearWinDetect(int board[][w_], int who)
+int nearWinDetectA(int board[][w_], int who)
 {
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
@@ -516,20 +700,20 @@ bool winDetect(int board[][w_], int who)
 	}
 
 	return -1;
-}*/
+}
 
 
 
-int nearWinDetect(int board[][w_], int who)
+int nearWinDetectB(int board[][w_], int who)
 {
-	int col = -1;
+	int rowPlayed;
 
 	for (int i = 0; i < w_; i++)
 	{
-		playMove(board, i, who);
+		rowPlayed = playMove(board, i, who);
 		//printBoard(board);
 
-		if (winDetect(board, who))
+		if (winDetect(board, rowPlayed, i))
 		{
 			unPlayMove(board, i);
 			//printBoard(board);
@@ -690,4 +874,29 @@ void rankScores(int score[], int rankedScore[])
 		if (!placed)
 			rankedScore[i] = i;
 	}
+}
+
+
+
+void printScore(int score[])
+{
+	for (int i = 0; i < w_; i++)
+		cout << score[i] << "\t";
+	cout << "\n";
+}
+
+
+
+void scoreReset(int score[])
+{
+	for (int i = 0; i < w_; i++)
+		score[i] = 0;
+}
+
+
+
+void rankedScoreReset(int rankedScore[])
+{
+	for (int i = 0; i < w_; i++)
+		rankedScore[i] = -1;
 }
