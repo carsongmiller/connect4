@@ -5,17 +5,14 @@
 
 /*
 
-Things to modify:of
--fix winDetect() (I think it's working now)
+Things to modify:
 -shallower recursion beginning, allow deeper as game goes on
 -weigh certain situations at certain situations in the game more heavily
--when the board is symmetrical, the scores for each column should be symmetrical
+-when the board is symmetrical, the scores for each column should be symmetrical (fixed)
 -consider adding a small bit of randomness into minimax
--like if two options are both very good and within %20 of eachother or something
--add a chance that the "worse" one is chosen
+	-like if two options are both very good and within %20 of eachother or something
+	-add a chance that the "worse" one is chosen
 -weigh scores better
-
--minimax heavily favors left side.  fix this
 
 -consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
 -this would be overwritten by logic that makes minimax go shallower at the beginning
@@ -38,7 +35,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-const int MAX_ITER = 8;
+const int MAX_ITER = 6;
 
 
 //Values for SetConsoleTextAttribute()
@@ -74,11 +71,8 @@ int numWinComb(int board[][w_], int r, int c);
 //constructs 3D array of [row][column][comb#] = (string)comb
 void makeCombTable(string *** combTable, int board[][w_]);
 
-//detects if "who" has won
-//bool winDetectOLD(int board[][w_], int who);
-
 //detects if the disc at board[r][c] has won
-bool winDetect(int board[][w_], int r, int c);
+bool winDetect(int board[][w_], int r, int c, int who);
 
 //detects if "who" is one disc away from winning
 int nearWinDetectA(int board[][w_], int who);
@@ -118,6 +112,9 @@ void initBoard(int board[][w_]);
 
 //prints out which player is which color
 void printPlayerColors();
+
+//checks if a cell is in bounds of board[][]
+bool isValidCell(int board[][w_], int r, int c);
 
 
 
@@ -206,7 +203,7 @@ int main()
 
 			printBoard(board);
 
-				if (winDetect(board, rowPlayed, colPlayed))
+				if (winDetect(board, rowPlayed, colPlayed, cDisc))
 				{
 					cout << "\nThe computer wins!\n";
 					break;
@@ -238,7 +235,7 @@ int main()
 			printBoard(board);
 
 			//detecting a player win	
-				if (winDetect(board, rowPlayed, moveChoice - 1))
+				if (winDetect(board, rowPlayed, moveChoice - 1, pDisc))
 				{
 					cout << "\nYou win!\n";
 					break;
@@ -275,11 +272,11 @@ int playMove(int board[][w_], int col, int who)
 
 bool unPlayMove(int board[][w_], int col)
 {
-	for (int i = h_ - 1; i > 0; i++)
+	for (int i = h_ - 1; i > 0; i--)
 	{
 		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
 		{
-			board[i][col] = 0;
+			board[i][col] = nDisc;
 			return true;
 		}
 		else if (i == 1 && board[0][col] != nDisc)
@@ -308,41 +305,44 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 	{
 		for (int i = 0; i < w_; i++)
 		{
+			if (iter == 0 && i == 0)
+			{
+				nearWinP = nearWinDetectB(newBoard, pDisc);
+				if (nearWinP != -1)
+				{
+					score[nearWinP] += 1000000;
+					break;
+				}
+			}
+
 			rowPlayed = playMove(newBoard, i, currentCheck);
 
 			if (rowPlayed != -1)
-			{
-				/*if (iter == 0)
-				{
-					nearWinP = nearWinDetectA(newBoard, pDisc);
-					if (nearWinP != -1)
-						score[nearWinP] += 1000000;
-				}*/
-				
-				if (winDetect(newBoard, rowPlayed, i))
+			{				
+				if (winDetect(newBoard, rowPlayed, i, cDisc))
 				{
 					if (iter == 0)
 					{
-						score[i] += 1000;
+						//score[i] += 1000;
 					}
 					else
-						score[i] += (MAX_ITER - iter);
+						score[i] += (MAX_ITER - iter + 1) / (iter + 1);
 				}
 
 
-				else if (winDetect(newBoard, rowPlayed, i))
+				else if (winDetect(newBoard, rowPlayed, i, pDisc))
 				{
 					//printBoard(newBoard); //debug
 					if (iter == 1)
 					{
-						score[i] -= 1000;
+						//score[i] -= 1000;
 					}
 					else
-						score[i] -= (MAX_ITER - iter);
+						score[i] -= (MAX_ITER - iter + 1)/(iter + 1);
 				}
 
 
-				else if (!winDetect(newBoard, rowPlayed, i) && !winDetect(newBoard, rowPlayed, i))
+				else
 				{
 					if (currentCheck == cDisc)
 						currentCheck = pDisc;
@@ -352,13 +352,77 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 					minimax(newBoard, score, who, currentCheck, iter + 1);
 				}
 			}
+
+			unPlayMove(newBoard, i);
 		}
 	}
 }
 
 
 
-bool winDetect(int board[][w_], int r, int c)
+bool winDetect(int board[][w_], int r, int c, int who)
+{
+	int consec;
+
+	//checking for horizontal
+		consec = 0;
+		for (int i = c - 3; i <= c + 3; i++)
+		{
+			if (isValidCell(board, r, i) && board[r][i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
+		}
+
+	//checking for vertical
+		consec = 0;
+		for (int i = r - 3; i <= r + 3; i++)
+		{
+			if (isValidCell(board, i, c) && board[i][c] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
+		}
+
+
+	//checking for diagonal down
+		consec = 0;
+		for (int i = -3; i <= 3; i++)
+		{
+			if (isValidCell(board, r + i, c + i) && board[r + i][c + i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
+		}
+
+	//checking for diagonal up
+		consec = 0;
+		for (int i = -3; i <= 3; i++)
+		{
+			if (isValidCell(board, r - i, c + i) && board[r - i][c + i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
+		}
+
+	return false;
+}
+
+
+
+/*bool winDetect(int board[][w_], int r, int c)
 {
 	int who = board[r][c];
 	bool win = false;
@@ -462,12 +526,12 @@ bool winDetect(int board[][w_], int r, int c)
 			return true;
 
 		return false;
-}
+}*/
 
 
 
 
-int nearWinDetectA(int board[][w_], int who)
+/*int nearWinDetectA(int board[][w_], int who)
 {
 	//detecting horizontal wins
 	for (int r = h_ - 1; r >= 0; r--)
@@ -558,7 +622,7 @@ int nearWinDetectA(int board[][w_], int who)
 	}
 
 	return -1;
-}
+}*/
 
 
 
@@ -571,7 +635,7 @@ int nearWinDetectB(int board[][w_], int who)
 		rowPlayed = playMove(board, i, who);
 		//printBoard(board);
 
-		if (winDetect(board, rowPlayed, i))
+		if (winDetect(board, rowPlayed, i, who))
 		{
 			unPlayMove(board, i);
 			//printBoard(board);
@@ -782,4 +846,14 @@ void printPlayerColors()
 	cout << "Computer: ";
 	printColor('O', BLUE);
 	cout << endl;
+}
+
+
+
+bool isValidCell(int board[][w_], int r, int c)
+{
+	if (r >= 0 && r < h_ && c >= 0 && c < w_)
+		return true;
+	else
+		return false;
 }
