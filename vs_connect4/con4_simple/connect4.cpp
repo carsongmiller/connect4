@@ -17,6 +17,8 @@ Things to modify:
 -consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
 -this would be overwritten by logic that makes minimax go shallower at the beginning
 
+-add print functions to clean up main()
+
 */
 
 
@@ -75,8 +77,7 @@ void makeCombTable(string *** combTable, int board[][w_]);
 bool winDetect(int board[][w_], int r, int c, int who);
 
 //detects if "who" is one disc away from winning
-int nearWinDetectA(int board[][w_], int who);
-int nearWinDetectB(int board[][w_], int who);
+int nearWinDetect(int board[][w_], int who);
 
 //determines the best move for "who"
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
@@ -254,43 +255,6 @@ int main()
 
 
 
-int playMove(int board[][w_], int col, int who)
-{
-	for (int i = h_ - 1; i >= 0; i--)
-	{
-		if (board[i][col] == nDisc)
-		{
-			board[i][col] = who;
-			return i;
-		}
-	}
-
-	return -1;
-}
-
-
-
-bool unPlayMove(int board[][w_], int col)
-{
-	for (int i = h_ - 1; i > 0; i--)
-	{
-		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
-		{
-			board[i][col] = nDisc;
-			return true;
-		}
-		else if (i == 1 && board[0][col] != nDisc)
-		{
-			board[0][col] = nDisc;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
-
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 {
 	int newBoard[h_][w_];
@@ -307,7 +271,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 		{
 			if (iter == 0 && i == 0)
 			{
-				nearWinP = nearWinDetectB(newBoard, pDisc);
+				nearWinP = nearWinDetect(newBoard, pDisc);
 				if (nearWinP != -1)
 				{
 					score[nearWinP] += 1000000;
@@ -318,7 +282,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 			rowPlayed = playMove(newBoard, i, currentCheck);
 
 			if (rowPlayed != -1)
-			{				
+			{
 				if (winDetect(newBoard, rowPlayed, i, cDisc))
 				{
 					if (iter == 0)
@@ -338,7 +302,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 						//score[i] -= 1000;
 					}
 					else
-						score[i] -= (MAX_ITER - iter + 1)/(iter + 1);
+						score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
 				}
 
 
@@ -422,234 +386,65 @@ bool winDetect(int board[][w_], int r, int c, int who)
 
 
 
-/*bool winDetect(int board[][w_], int r, int c)
-{
-	int who = board[r][c];
-	bool win = false;
-	int consec;
 
-	//straight left
-		consec = 0;
-		for (int i = 1; i <= 3; i++) 
-		{
-			if (c - i >= 0 && board[r][c-i] == who)
-				consec++;
-			else
-				break;
-		}
-
-		if (consec == 3)
-			return true;
-
-	//straight right
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (c + i < w_ && board[r][c + i] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//diagonal up left
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (c - i >= 0 && r - i >= 0 && board[r - i][c - i] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//diagonal up right
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (c + i < w_ && r - i >= 0 && board[r - i][c + i] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//diagonal down left
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (c - i >= 0 && r + i < h_ && board[r + i][c - i] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//diagonal down right
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (c + i < w_ && r + i < h_ && board[r + i][c + i] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//straight up
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (r - i >= 0 && board[r - i][c] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-	//straight down
-		consec = 0;
-		for (int i = 1; i <= 3; i++)
-		{
-			if (r + i < h_ && board[r + i][c] == who)
-				consec++;
-			else
-				break;
-		}
-		if (consec == 3)
-			return true;
-
-		return false;
-}*/
-
-
-
-
-/*int nearWinDetectA(int board[][w_], int who)
-{
-	//detecting horizontal wins
-	for (int r = h_ - 1; r >= 0; r--)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r][c + 1] == who)
-				{
-					if (board[r][c + 2] == who)
-					{
-						//making sure the winning spot is available & possible
-						if (board[r][c + 3] == nDisc && board[r + 1][c + 3] != nDisc)
-							return c + 3;
-						else if (board[r][c - 1] == nDisc && board[r + 1][c - 1] != nDisc)
-							return c - 1;
-					}
-				}
-			}
-		}
-	}
-
-
-	//detecting vertical wins
-	for (int c = 0; c < w_; c++) //cycling through all columns
-	{
-		for (int r = h_ - 1; r > 2; r--) //cycling through sets of 3 cells in the same column
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r - 1][c] == who)
-				{
-					if (board[r - 2][c] == who)
-					{
-						//making sure the winning spot is available & possible
-						if (board[r - 3][c] == nDisc)
-							return c;
-					}
-				}
-			}
-		}
-	}
-
-
-	//detcting diagonal-up wins
-	for (int r = h_ - 1; r > 1; r--)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r - 1][c + 1] == who)
-				{
-					if (board[r - 2][c + 2] == who)
-					{
-						//making sure the winning spot is available & possible
-						if (board[r - 3][c + 3] == nDisc && board[r - 2][c + 3] != nDisc)
-							return c + 3;
-						else if (board[r + 1][c - 1] == nDisc && board[r + 2][c - 1] != nDisc)
-							return c - 1;
-					}
-				}
-			}
-		}
-	}
-
-	//detecting diagonal-down wins
-	for (int r = 0; r < h_ - 2; r++)
-	{
-		for (int c = 0; c < w_ - 2; c++)
-		{
-			if (board[r][c] == who)
-			{
-				if (board[r + 1][c + 1] == who)
-				{
-					if (board[r + 2][c + 2] == who)
-					{
-						//making sure the winning spot is available & possible
-						if (board[r - 1][c - 1] == nDisc && board[r][c - 1] != nDisc)
-							return c - 1;
-						else if (board[r + 3][c + 3] == nDisc && board[r + 4][c + 3] != nDisc)
-							return c + 3;
-					}
-				}
-			}
-		}
-	}
-
-	return -1;
-}*/
-
-
-
-int nearWinDetectB(int board[][w_], int who)
+int nearWinDetect(int board[][w_], int who)
 {
 	int rowPlayed;
 
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed = playMove(board, i, who);
-		//printBoard(board);
 
 		if (winDetect(board, rowPlayed, i, who))
 		{
 			unPlayMove(board, i);
-			//printBoard(board);
 			return i;
 		}
 
 		else
 		{
 			unPlayMove(board, i);
-			//printBoard(board);
 		}
 	}
 
 	return -1;
+}
+
+
+
+int playMove(int board[][w_], int col, int who)
+{
+	for (int i = h_ - 1; i >= 0; i--)
+	{
+		if (board[i][col] == nDisc)
+		{
+			board[i][col] = who;
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+
+
+bool unPlayMove(int board[][w_], int col)
+{
+	for (int i = h_ - 1; i > 0; i--)
+	{
+		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
+		{
+			board[i][col] = nDisc;
+			return true;
+		}
+		else if (i == 1 && board[0][col] != nDisc)
+		{
+			board[0][col] = nDisc;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -841,10 +636,10 @@ void initBoard(int board[][w_])
 void printPlayerColors()
 {
 	cout << "Player: ";
-	printColor('O', RED);
+	printColor('O', LIGHTRED);
 	cout << endl;
 	cout << "Computer: ";
-	printColor('O', BLUE);
+	printColor('O', LIGHTBLUE);
 	cout << endl;
 }
 
