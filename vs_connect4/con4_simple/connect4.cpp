@@ -280,17 +280,17 @@ void minimax(int board[][w_], long int score[], int who, int currentCheck, int i
 
 				else //if no wins were found
 				{
-					if (turn >= 8)
+					/*if (turn >= 8)
 					{
 						vertTrapC = vertTrapDetect(board, cDisc);
 						vertTrapP = vertTrapDetect(board, pDisc);
 
 						if (vertTrapC != -1) //checks for a vertical trap in favor of the computer
-							score[vertTrapC] += pow(10, (1.0*MAX_ITER) / iter);
+							score[vertTrapC] += pow(6, (1.0*MAX_ITER) / iter);
 
 						if (vertTrapP != -1) //checks for a vertical trap in favor of the player
-							score[vertTrapP] -= pow(10, (1.0*MAX_ITER) / iter);
-					}
+							score[vertTrapP] -= pow(6, (1.0*MAX_ITER) / iter);
+					}*/
 
 
 					if (currentCheck == cDisc)

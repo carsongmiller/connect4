@@ -1,4 +1,4 @@
-﻿Build started 10/15/2015 2:22:26 PM.
+﻿Build started 10/15/2015 2:40:15 PM.
      1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_simple\Project1.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (Project1.vcxproj, vs_connect4_simple.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
@@ -6,10 +6,10 @@
          connect4.cpp
      1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(135): warning C4101: 'validMove': unreferenced local variable
      1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(137): warning C4101: 'moveChoice': unreferenced local variable
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(304): warning C4244: '+=': conversion from 'double' to 'long', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(311): warning C4244: '+=': conversion from 'double' to 'long', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(323): warning C4244: '+=': conversion from 'double' to 'long', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(326): warning C4244: '-=': conversion from 'double' to 'long', possible loss of data
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(270): warning C4244: '+=': conversion from 'double' to 'long', possible loss of data
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(277): warning C4244: '+=': conversion from 'double' to 'long', possible loss of data
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(234): warning C4101: 'vertTrapC': unreferenced local variable
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_simple\connect4.cpp(234): warning C4101: 'vertTrapP': unreferenced local variable
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_simple.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_simple.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_simple.lib" /MACHINE:X86 Debug\connect4.obj
          Project1.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_simple.exe
@@ -17,4 +17,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:03.77
+Time Elapsed 00:00:03.59
