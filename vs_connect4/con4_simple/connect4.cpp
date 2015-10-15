@@ -155,7 +155,10 @@ int main()
 		cin >> whoFirst;
 
 		if (whoFirst == 'm' || whoFirst == 'M')
+		{
+			printScreen(board, score);
 			playerMove(board, score, turn, rowPlayed, colPlayed);
+		}
 
 		//MAIN GAME LOOP
 
@@ -190,6 +193,10 @@ int main()
 
 				printScreen(board, score);
 
+				cout << "The computer played in column ";
+				printColor(colPlayed+1, GREEN);
+				cout << "\n";
+
 
 				if (winDetect(board, rowPlayed, colPlayed, cDisc))
 				{
@@ -199,7 +206,6 @@ int main()
 
 
 			//now the player's turn
-			
 				playerMove(board, score, turn, rowPlayed, colPlayed);
 
 				printScreen(board, score);
@@ -479,6 +485,112 @@ bool unPlayMove(int board[][w_], int col, int &turn)
 
 
 
+void rankScores(long int score[], long int rankedScore[])
+{
+	bool placed;
+
+	rankedScore[0] = 0; //creates a base reference for the ranking
+
+	for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
+	{
+		placed = false; //makes sure a column is only ranked once
+		for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
+		{
+			if (score[i] > score[rankedScore[n]])
+			{
+				for (int x = w_ - 1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
+				{
+					rankedScore[x] = rankedScore[x - 1];
+				}
+
+				rankedScore[n] = i;
+				placed = true;
+				break; //again makes sure a column is only ranked once
+			}
+		}
+
+		if (!placed)
+			rankedScore[i] = i;
+	}
+}
+
+
+
+char getChar(int board[][w_], int r, int c)
+{
+	if (board[r][c] == nDisc)
+		return ' ';
+
+	else if (board[r][c] == pDisc || board[r][c] == cDisc)
+		return 'O';
+
+	else
+		return 'X'; //something went wrong
+}
+
+
+
+void copyBoard(int board[][w_], int newBoard[][w_])
+{
+	for (int r = 0; r < h_; r++)
+	{
+		for (int c = 0; c < w_; c++)
+		{
+			newBoard[r][c] = board[r][c];
+		}
+	}
+}
+
+
+
+void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed)
+{
+	bool isValid;
+	
+	isValid = false;
+	cout << "Where would you like to go? (enter column number): ";
+	cin >> colPlayed;
+
+	while (!isValid)
+	{
+		if (colPlayed > w_ || colPlayed < 1)
+		{
+			cout << "There is no column " << colPlayed << ". Please choose a column between 1 and " << w_ << "\n\n";
+			
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+		else
+			break;
+	}
+
+	while (!isValid)
+	{
+		rowPlayed = playMove(board, colPlayed - 1, pDisc, turn);
+
+		if (rowPlayed == -1)
+		{
+			cout << "There is no space in that column, choose a different one\n\n";
+			
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+
+		else
+			break;
+	}
+}
+
+
+
+/*
+	
+	PRINT FUNCTIONS
+
+*/
+
+
+
 //Following code is pretty messy, but it works and makes a nice print out
 
 void printBoard(int board[][w_])
@@ -543,113 +655,6 @@ void printBoard(int board[][w_])
 
 
 
-char getChar(int board[][w_], int r, int c)
-{
-	if (board[r][c] == nDisc)
-		return ' ';
-
-	else if (board[r][c] == pDisc || board[r][c] == cDisc)
-		return 'O';
-
-	else
-		return 'X'; //something went wrong
-}
-
-
-
-void copyBoard(int board[][w_], int newBoard[][w_])
-{
-	for (int r = 0; r < h_; r++)
-	{
-		for (int c = 0; c < w_; c++)
-		{
-			newBoard[r][c] = board[r][c];
-		}
-	}
-}
-
-
-
-void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed)
-{
-	bool isValid;
-	printScreen(board, score);
-
-	isValid = false;
-	cout << "Where would you like to go? (enter column number): ";
-	cin >> colPlayed;
-
-	while (!isValid)
-	{
-		if (colPlayed > w_ || colPlayed < 1)
-		{
-			cout << "There is no column " << colPlayed << ". Please choose a column between 1 and " << w_ << "\n\n";
-			printScreen(board, score);
-			cout << "Where would you like to go? (enter column number): ";
-			cin >> colPlayed;
-		}
-		else
-			break;
-	}
-
-	while (!isValid)
-	{
-		rowPlayed = playMove(board, colPlayed - 1, pDisc, turn);
-
-		if (rowPlayed == -1)
-		{
-			cout << "There is no space in that column, choose a different one\n\n";
-			printScreen(board, score);
-			cout << "Where would you like to go? (enter column number): ";
-			cin >> colPlayed;
-		}
-
-		else
-			break;
-	}
-}
-
-
-
-/*
-	
-	PRINT FUNCTIONS
-
-*/
-
-
-
-void rankScores(long int score[], long int rankedScore[])
-{
-	bool placed;
-
-	rankedScore[0] = 0; //creates a base reference for the ranking
-
-	for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
-	{
-		placed = false; //makes sure a column is only ranked once
-		for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
-		{
-			if (score[i] > score[rankedScore[n]])
-			{
-				for (int x = w_ - 1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
-				{
-					rankedScore[x] = rankedScore[x - 1];
-				}
-
-				rankedScore[n] = i;
-				placed = true;
-				break; //again makes sure a column is only ranked once
-			}
-		}
-
-		if (!placed)
-			rankedScore[i] = i;
-	}
-}
-
-
-
 void printScore(long int score[])
 {
 	for (int i = 0; i < w_; i++)
@@ -677,7 +682,7 @@ void printScreen(int board[][w_], long int score[])
 	cout << "CONNECT 4!\n";
 	printPlayerColors();
 	printBoard(board);
-	printScore(score);
+	//printScore(score);
 	cout << "\n";
 }
 
