@@ -79,6 +79,9 @@ bool winDetect(int board[][w_], int r, int c, int who);
 //detects if "who" is one disc away from winning
 int nearWinDetect(int board[][w_], int who);
 
+//detects if "who" has two places they could win
+bool trapDetect(int board[][w_], int who);
+
 //determines the best move for "who"
 void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
 
@@ -153,11 +156,11 @@ int main()
 				cout << "Where would you like to go? (enter column number): ";
 				cin >> moveChoice;
 
-				if (!playMove(board, moveChoice - 1, pDisc))
-					cout << "There is no space in that column, choose a different one\n\n";
-
 				if (moveChoice > w_)
 					cout << "There is no column " << moveChoice << ". Please choose a column between 1 and " << w_ << "\n\n";
+
+				else if (!playMove(board, moveChoice - 1, pDisc))
+					cout << "There is no space in that column, choose a different one\n\n";
 
 				else
 					validMove = true;
@@ -263,6 +266,7 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 	//printBoard(newBoard); //debug
 
 	int nearWinP;
+	int nearWinC;
 	int rowPlayed;
 
 	if (iter <= MAX_ITER)
@@ -271,7 +275,14 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 		{
 			if (iter == 0 && i == 0)
 			{
-				nearWinP = nearWinDetect(newBoard, pDisc);
+				nearWinC = nearWinDetect(newBoard, cDisc); //checks for immediate possibility to win
+				if (nearWinC != -1)
+				{
+					score[nearWinC] += 1000000;
+					break;
+				}
+
+				nearWinP = nearWinDetect(newBoard, pDisc); //checks for immediate need to block
 				if (nearWinP != -1)
 				{
 					score[nearWinP] += 1000000;
@@ -290,19 +301,20 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 						//score[i] += 1000;
 					}
 					else
-						score[i] += (MAX_ITER - iter + 1) / (iter + 1);
+						//score[i] += (MAX_ITER - iter + 1) / (iter + 1);
+						score[i] += pow(7, (1.0*MAX_ITER) / iter);
 				}
 
 
 				else if (winDetect(newBoard, rowPlayed, i, pDisc))
 				{
-					//printBoard(newBoard); //debug
 					if (iter == 1)
 					{
 						//score[i] -= 1000;
 					}
 					else
-						score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
+						//score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
+						score[i] += pow(7, (1.0*MAX_ITER) / iter);
 				}
 
 
@@ -409,6 +421,35 @@ int nearWinDetect(int board[][w_], int who)
 
 	return -1;
 }
+
+
+
+bool trapDetect(int board[][w_], int who)
+{
+	int rowPlayed1, rowPlayed2;
+
+	for (int i = 0; i < w_; i++)
+	{
+		rowPlayed1 = playMove(board, i, who); //play first move
+
+		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
+		{
+			rowPlayed2 = playMove(board, i, who); //play second move
+			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
+			{
+				unPlayMove(board, i);
+				unPlayMove(board, i);
+				return true;
+			}
+			if(rowPlayed2 != -1)
+				unPlayMove(board, i);
+		}
+
+		if(rowPlayed1 != -1)
+			unPlayMove(board, i);
+	}
+}
+
 
 
 
