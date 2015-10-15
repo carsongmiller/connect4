@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "con4_fancy", "con4_fancy\vs_connect4.vcxproj", "{9750B821-1748-4020-A11E-3FEB787A2B2B}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "con4_simple", "con4_simple\Project1.vcxproj", "{12E6182F-6F96-4045-B962-753525EC8C3D}"
 EndProject
 Global
@@ -15,14 +13,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Debug|x64.ActiveCfg = Debug|x64
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Debug|x64.Build.0 = Debug|x64
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Debug|x86.ActiveCfg = Debug|Win32
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Debug|x86.Build.0 = Debug|Win32
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Release|x64.ActiveCfg = Release|x64
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Release|x64.Build.0 = Release|x64
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Release|x86.ActiveCfg = Release|Win32
-		{9750B821-1748-4020-A11E-3FEB787A2B2B}.Release|x86.Build.0 = Release|Win32
 		{12E6182F-6F96-4045-B962-753525EC8C3D}.Debug|x64.ActiveCfg = Debug|x64
 		{12E6182F-6F96-4045-B962-753525EC8C3D}.Debug|x64.Build.0 = Debug|x64
 		{12E6182F-6F96-4045-B962-753525EC8C3D}.Debug|x86.ActiveCfg = Debug|Win32
