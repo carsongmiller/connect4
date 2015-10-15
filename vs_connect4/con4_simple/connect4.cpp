@@ -85,6 +85,9 @@ void minimax(int board[][w_], long int score[], int who, int currentCheck, int i
 //prints the board
 void printBoard(int board[][w_]);
 
+//takes care of printing most of the screen
+void printScreen(int board[][w_], long int score[]);
+
 //copies the board
 void copyBoard(int board[][w_], int newBoard[][w_]);
 
@@ -120,6 +123,10 @@ bool isValidCell(int board[][w_], int r, int c);
 //sets a cell with no logical checks
 int setCell(int board[][w_], int r, int c, int who);
 
+//player choosing his move and making move
+void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed);
+
+
 
 
 int main()
@@ -139,6 +146,7 @@ int main()
 	{
 		turn = 0;
 		initBoard(board);
+		scoreReset(score);
 
 		//First output of the program:
 		system("cls");
@@ -147,34 +155,14 @@ int main()
 		cin >> whoFirst;
 
 		if (whoFirst == 'm' || whoFirst == 'M')
-		{
-			printBoard(board);
-
-			validMove = false;
-			while (!validMove)
-			{
-				cout << "Where would you like to go? (enter column number): ";
-				cin >> moveChoice;
-
-				if (moveChoice > w_)
-					cout << "There is no column " << moveChoice << ". Please choose a column between 1 and " << w_ << "\n\n";
-
-				else if (!playMove(board, moveChoice - 1, pDisc, turn))
-					cout << "There is no space in that column, choose a different one\n\n";
-
-				else
-					validMove = true;
-			}
-		}
-
-		system("cls");
-		cout << "CONNECT 4!\n\n\n";
-		printBoard(board);
+			playerMove(board, score, turn, rowPlayed, colPlayed);
 
 		//MAIN GAME LOOP
 
 		while (cont)
 		{
+			printScreen(board, score);
+
 			scoreReset(score);
 			rankedScoreReset(rankedScore);
 
@@ -200,12 +188,8 @@ int main()
 					}
 				}
 
-			system("cls");
-			cout << "\nCONNECT 4!\n\n";
+				printScreen(board, score);
 
-			printScore(score); //print the score[] array
-
-			printBoard(board);
 
 				if (winDetect(board, rowPlayed, colPlayed, cDisc))
 				{
@@ -214,32 +198,14 @@ int main()
 				}
 
 
-			//debug lines for nearWinDetect()
-				//cout << "\n\ncDisc: " << nearWinDetect(board, cDisc) << "\n";
-				//cout << "pDisc: " << nearWinDetect(board, pDisc) << "\n";
-
 			//now the player's turn
-			//Player chosing his move
-			validMove = false;
-				while (!validMove)
-				{
-					cout << "Where would you like to go? (enter column number): ";
-					cin >> moveChoice;
+			
+				playerMove(board, score, turn, rowPlayed, colPlayed);
 
-					rowPlayed = playMove(board, moveChoice - 1, pDisc, turn);
-
-					if (rowPlayed == -1)
-						cout << "There is no space in that column, choose a different one\n";
-					else
-						validMove = true;
-				}
-
-			system("cls");
-			cout << "CONNECT 4!\n\n\n";
-			printBoard(board);
+				printScreen(board, score);
 
 			//detecting a player win	
-				if (winDetect(board, rowPlayed, moveChoice - 1, pDisc))
+				if (winDetect(board, rowPlayed, colPlayed - 1, pDisc))
 				{
 					cout << "\nYou win!\n";
 					break;
@@ -604,27 +570,52 @@ void copyBoard(int board[][w_], int newBoard[][w_])
 
 
 
-void printColor(string str, int color)
+void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed)
 {
-	SetConsoleTextAttribute(H, color);
-	cout << str;
-	SetConsoleTextAttribute(H, WHITE);
+	bool isValid;
+	printScreen(board, score);
+
+	isValid = false;
+	cout << "Where would you like to go? (enter column number): ";
+	cin >> colPlayed;
+
+	while (!isValid)
+	{
+		if (colPlayed > w_ || colPlayed < 1)
+		{
+			cout << "There is no column " << colPlayed << ". Please choose a column between 1 and " << w_ << "\n\n";
+			printScreen(board, score);
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+		else
+			break;
+	}
+
+	while (!isValid)
+	{
+		rowPlayed = playMove(board, colPlayed - 1, pDisc, turn);
+
+		if (rowPlayed == -1)
+		{
+			cout << "There is no space in that column, choose a different one\n\n";
+			printScreen(board, score);
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+
+		else
+			break;
+	}
 }
 
-void printColor(int i, int color)
-{
-	SetConsoleTextAttribute(H, color);
-	cout << i;
-	SetConsoleTextAttribute(H, WHITE);
-}
 
-void printColor(char c, int color)
-{
-	SetConsoleTextAttribute(H, color);
-	cout << c;
-	SetConsoleTextAttribute(H, WHITE);
-}
 
+/*
+	
+	PRINT FUNCTIONS
+
+*/
 
 
 
@@ -668,6 +659,53 @@ void printScore(long int score[])
 
 
 
+void printPlayerColors()
+{
+	cout << "Player: ";
+	printColor('O', LIGHTRED);
+	cout << endl;
+	cout << "Computer: ";
+	printColor('O', LIGHTBLUE);
+	cout << endl;
+}
+
+
+
+void printScreen(int board[][w_], long int score[])
+{
+	system("cls");
+	cout << "CONNECT 4!\n";
+	printPlayerColors();
+	printBoard(board);
+	printScore(score);
+	cout << "\n";
+}
+
+
+
+void printColor(string str, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << str;
+	SetConsoleTextAttribute(H, WHITE);
+}
+
+void printColor(int i, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << i;
+	SetConsoleTextAttribute(H, WHITE);
+}
+
+void printColor(char c, int color)
+{
+	SetConsoleTextAttribute(H, color);
+	cout << c;
+	SetConsoleTextAttribute(H, WHITE);
+}
+
+
+
 void scoreReset(long int score[])
 {
 	for (int i = 0; i < w_; i++)
@@ -693,18 +731,6 @@ void initBoard(int board[][w_])
 				board[r][c] = nDisc;
 			}
 		}
-}
-
-
-
-void printPlayerColors()
-{
-	cout << "Player: ";
-	printColor('O', LIGHTRED);
-	cout << endl;
-	cout << "Computer: ";
-	printColor('O', LIGHTBLUE);
-	cout << endl;
 }
 
 
