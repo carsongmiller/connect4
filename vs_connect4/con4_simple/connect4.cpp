@@ -5,14 +5,17 @@
 
 /*
 
-Things to modify:
+TO DO:
 -shallower recursion beginning, allow deeper as game goes on
 -weigh certain situations at certain situations in the game more heavily
 -when the board is symmetrical, the scores for each column should be symmetrical (fixed)
 -consider adding a small bit of randomness into minimax
 	-like if two options are both very good and within %20 of eachother or something
 	-add a chance that the "worse" one is chosen
--weigh scores better
+-weigh scores better (possibly fixed)
+
+-consider: not sure whether to use an if-if statement or an if-else when checking for vert traps (in minimax)
+	-currently using if-if
 
 -consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
 -this would be overwritten by logic that makes minimax go shallower at the beginning
@@ -62,28 +65,22 @@ const int WHITE = 15;
 
 
 //returns true if move is valid, returns false if not
-int playMove(int board[][w_], int col, int who);
+int playMove(int board[][w_], int col, int who, int &turn);
 
 //deletes the top disc in the given column
-bool unPlayMove(int board[][w_], int col);
+bool unPlayMove(int board[][w_], int col, int &turn);
 
-//returns how many winning arrangements (combinations) the given cell is involved in
-int numWinComb(int board[][w_], int r, int c);
-
-//constructs 3D array of [row][column][comb#] = (string)comb
-void makeCombTable(string *** combTable, int board[][w_]);
-
-//detects if the disc at board[r][c] has won
+//checks if the disc at board[r][c] has won
 bool winDetect(int board[][w_], int r, int c, int who);
 
-//detects if "who" is one disc away from winning
+//checks if "who" is one disc away from winning
 int nearWinDetect(int board[][w_], int who);
 
-//detects if "who" has two places they could win
-bool trapDetect(int board[][w_], int who);
+//checks if "who" has two places they could win stacked on top of eachother (returns column)
+int vertTrapDetect(int board[][w_], int who);
 
 //determines the best move for "who"
-void minimax(int board[][w_], int score[], int who, int currentCheck, int iter);
+void minimax(int board[][w_], long int score[], int who, int currentCheck, int iter, int turn);
 
 //prints the board
 void printBoard(int board[][w_]);
@@ -100,16 +97,16 @@ void printColor(char c, int color);
 char getChar(int board[][w_], int r, int c);
 
 //ranks the scores of columns
-void rankScores(int score[], int rankedScore[]);
+void rankScores(long int score[], long int rankedScore[]);
 
 //prints the score[] array (mostly for debugging)
-void printScore(int score[]);
+void printScore(long int score[]);
 
 //resets the score[] array
-void scoreReset(int score[]);
+void scoreReset(long int score[]);
 
 //resets the rankedScore[] array
-void rankedScoreReset(int rankedScore[]);
+void rankedScoreReset(long int rankedScore[]);
 
 //initializes the board
 void initBoard(int board[][w_]);
@@ -120,6 +117,9 @@ void printPlayerColors();
 //checks if a cell is in bounds of board[][]
 bool isValidCell(int board[][w_], int r, int c);
 
+//sets a cell with no logical checks
+int setCell(int board[][w_], int r, int c, int who);
+
 
 
 int main()
@@ -128,16 +128,16 @@ int main()
 	bool cont = true, validMove, newGame = true; //determines whether the game should continue
 	char whoFirst; //who will go first
 	int moveChoice; //human player's move choice
-	int score[w_]; //stores the scores of each column (handed to minimax())
-	int rankedScore[w_]; //stores the scores in rank order
-	int bestScore; //stores the number of the column with the best score
+	long int score[w_]; //stores the scores of each column (handed to minimax())
+	long int rankedScore[w_]; //stores the scores in rank order
 	char yn; //takes input from player as to whether they want to play again
 	int rowPlayed; //stores the row in which the last disc was played
 	int colPlayed; //stores the column in which the last disc was played
-	//string *** combTable;
+	int turn; //keeps track of which turn # it is
 
 	while (newGame)
 	{
+		turn = 0;
 		initBoard(board);
 
 		//First output of the program:
@@ -159,7 +159,7 @@ int main()
 				if (moveChoice > w_)
 					cout << "There is no column " << moveChoice << ". Please choose a column between 1 and " << w_ << "\n\n";
 
-				else if (!playMove(board, moveChoice - 1, pDisc))
+				else if (!playMove(board, moveChoice - 1, pDisc, turn))
 					cout << "There is no space in that column, choose a different one\n\n";
 
 				else
@@ -181,7 +181,7 @@ int main()
 			cout << "Now its' the computer's turn\n\n";
 			cout << "thinking ...\n\n";
 
-			minimax(board, score, cDisc, cDisc, 0);
+			minimax(board, score, cDisc, cDisc, 0, turn);
 
 			rankScores(score, rankedScore);
 
@@ -192,7 +192,7 @@ int main()
 			//now the computer will make its move
 				for (int i = 0; i < w_; i++)
 				{
-					rowPlayed = playMove(board, rankedScore[i], cDisc);
+					rowPlayed = playMove(board, rankedScore[i], cDisc, turn);
 					if (rowPlayed != -1)
 					{
 						colPlayed = rankedScore[i];
@@ -226,7 +226,7 @@ int main()
 					cout << "Where would you like to go? (enter column number): ";
 					cin >> moveChoice;
 
-					rowPlayed = playMove(board, moveChoice - 1, pDisc);
+					rowPlayed = playMove(board, moveChoice - 1, pDisc, turn);
 
 					if (rowPlayed == -1)
 						cout << "There is no space in that column, choose a different one\n";
@@ -258,21 +258,25 @@ int main()
 
 
 
-void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
+void minimax(int board[][w_], long int score[], int who, int currentCheck, int iter, int turn)
 {
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
 
 	//printBoard(newBoard); //debug
 
-	int nearWinP;
-	int nearWinC;
-	int rowPlayed;
+	int nearWinP, nearWinC, rowPlayed, vertTrapP, vertTrapC;
 
 	if (iter <= MAX_ITER)
 	{
 		for (int i = 0; i < w_; i++)
 		{
+			if (turn <= 1)
+			{
+				score[w_ / 2] += 1000000;
+				break;
+			}
+
 			if (iter == 0 && i == 0)
 			{
 				nearWinC = nearWinDetect(newBoard, cDisc); //checks for immediate possibility to win
@@ -290,46 +294,49 @@ void minimax(int board[][w_], int score[], int who, int currentCheck, int iter)
 				}
 			}
 
-			rowPlayed = playMove(newBoard, i, currentCheck);
+			rowPlayed = playMove(newBoard, i, currentCheck, turn);
 
 			if (rowPlayed != -1)
 			{
-				if (winDetect(newBoard, rowPlayed, i, cDisc))
+				if (winDetect(newBoard, rowPlayed, i, cDisc)) //checks computer win
 				{
-					if (iter == 0)
-					{
-						//score[i] += 1000;
-					}
-					else
 						//score[i] += (MAX_ITER - iter + 1) / (iter + 1);
 						score[i] += pow(7, (1.0*MAX_ITER) / iter);
 				}
 
 
-				else if (winDetect(newBoard, rowPlayed, i, pDisc))
+				else if (winDetect(newBoard, rowPlayed, i, pDisc)) //checks player win
 				{
-					if (iter == 1)
-					{
-						//score[i] -= 1000;
-					}
-					else
 						//score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
 						score[i] += pow(7, (1.0*MAX_ITER) / iter);
 				}
 
 
-				else
+				else //if no wins were found
 				{
+					if (turn >= 8)
+					{
+						vertTrapC = vertTrapDetect(board, cDisc);
+						vertTrapP = vertTrapDetect(board, pDisc);
+
+						if (vertTrapC != -1) //checks for a vertical trap in favor of the computer
+							score[vertTrapC] += pow(10, (1.0*MAX_ITER) / iter);
+
+						if (vertTrapP != -1) //checks for a vertical trap in favor of the player
+							score[vertTrapP] -= pow(10, (1.0*MAX_ITER) / iter);
+					}
+
+
 					if (currentCheck == cDisc)
 						currentCheck = pDisc;
 					else if (currentCheck == pDisc)
 						currentCheck = cDisc;
 
-					minimax(newBoard, score, who, currentCheck, iter + 1);
+					minimax(newBoard, score, who, currentCheck, iter + 1, turn);
 				}
 			}
 
-			unPlayMove(newBoard, i);
+			unPlayMove(newBoard, i, turn);
 		}
 	}
 }
@@ -402,20 +409,21 @@ bool winDetect(int board[][w_], int r, int c, int who)
 int nearWinDetect(int board[][w_], int who)
 {
 	int rowPlayed;
+	int turn = 0;
 
 	for (int i = 0; i < w_; i++)
 	{
-		rowPlayed = playMove(board, i, who);
+		rowPlayed = playMove(board, i, who, turn);
 
 		if (winDetect(board, rowPlayed, i, who))
 		{
-			unPlayMove(board, i);
+			unPlayMove(board, i, turn);
 			return i;
 		}
 
 		else
 		{
-			unPlayMove(board, i);
+			unPlayMove(board, i, turn);
 		}
 	}
 
@@ -424,42 +432,55 @@ int nearWinDetect(int board[][w_], int who)
 
 
 
-bool trapDetect(int board[][w_], int who)
+int vertTrapDetect(int board[][w_], int who)
 {
 	int rowPlayed1, rowPlayed2;
+	int prev;
+	int turn = 0;
 
 	for (int i = 0; i < w_; i++)
 	{
-		rowPlayed1 = playMove(board, i, who); //play first move
+		rowPlayed1 = playMove(board, i, who, turn); //play first move
+		prev = setCell(board, rowPlayed1 - 1, i, nDisc); //avoids vertical win detection (cleared cell 1)
 
 		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
 		{
-			rowPlayed2 = playMove(board, i, who); //play second move
+			setCell(board, rowPlayed1 - 1, i, prev); //replacing cleared cell 1
+			rowPlayed2 = playMove(board, i, who, turn); //play second move
+			prev = setCell(board, rowPlayed2 - 1, i, nDisc); //avoids vertical win detection (cleared cell 2)
+
 			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
 			{
-				unPlayMove(board, i);
-				unPlayMove(board, i);
-				return true;
+				setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
+				unPlayMove(board, i, turn);
+				unPlayMove(board, i, turn);
+				return i;
 			}
+
+			setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
 			if(rowPlayed2 != -1)
-				unPlayMove(board, i);
+				unPlayMove(board, i, turn);
 		}
 
+		setCell(board, rowPlayed1 - 1, i, prev); //replacing cleared cell 1
 		if(rowPlayed1 != -1)
-			unPlayMove(board, i);
+			unPlayMove(board, i, turn);
 	}
+
+	return -1;
 }
 
 
 
 
-int playMove(int board[][w_], int col, int who)
+int playMove(int board[][w_], int col, int who, int &turn)
 {
 	for (int i = h_ - 1; i >= 0; i--)
 	{
 		if (board[i][col] == nDisc)
 		{
 			board[i][col] = who;
+			turn++;
 			return i;
 		}
 	}
@@ -469,18 +490,20 @@ int playMove(int board[][w_], int col, int who)
 
 
 
-bool unPlayMove(int board[][w_], int col)
+bool unPlayMove(int board[][w_], int col, int &turn)
 {
 	for (int i = h_ - 1; i > 0; i--)
 	{
 		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
 		{
 			board[i][col] = nDisc;
+			turn--;
 			return true;
 		}
 		else if (i == 1 && board[0][col] != nDisc)
 		{
 			board[0][col] = nDisc;
+			turn--;
 			return true;
 		}
 	}
@@ -605,7 +628,7 @@ void printColor(char c, int color)
 
 
 
-void rankScores(int score[], int rankedScore[])
+void rankScores(long int score[], long int rankedScore[])
 {
 	bool placed;
 
@@ -636,7 +659,7 @@ void rankScores(int score[], int rankedScore[])
 
 
 
-void printScore(int score[])
+void printScore(long int score[])
 {
 	for (int i = 0; i < w_; i++)
 		cout << score[i] << "\t";
@@ -645,7 +668,7 @@ void printScore(int score[])
 
 
 
-void scoreReset(int score[])
+void scoreReset(long int score[])
 {
 	for (int i = 0; i < w_; i++)
 		score[i] = 0;
@@ -653,7 +676,7 @@ void scoreReset(int score[])
 
 
 
-void rankedScoreReset(int rankedScore[])
+void rankedScoreReset(long int rankedScore[])
 {
 	for (int i = 0; i < w_; i++)
 		rankedScore[i] = -1;
@@ -692,4 +715,18 @@ bool isValidCell(int board[][w_], int r, int c)
 		return true;
 	else
 		return false;
+}
+
+
+
+int setCell(int board[][w_], int r, int c, int who)
+{
+	int prev = board[r][c];
+	if (isValidCell(board, r, c))
+	{
+		board[r][c] = who;
+		return prev;
+	}
+	else
+		return 0;
 }
