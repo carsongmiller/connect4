@@ -40,7 +40,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-const int MAX_ITER = 6;
+int MAX_ITER = 6;
 
 
 //Values for SetConsoleTextAttribute()
@@ -77,7 +77,10 @@ bool winDetect(int board[][w_], int r, int c, int who);
 int nearWinDetect(int board[][w_], int who);
 
 //checks if "who" has two places they could win stacked on top of eachother (returns column)
-int vertTrapDetect(int board[][w_], int who);
+int vTrapDetect(int board[][w_], int who);
+
+//checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
+int hTrapDetect(int board[][w_], int who);
 
 //determines the best move for "who"
 void minimax(int board[][w_], long int score[], int who, int currentCheck, int iter, int turn);
@@ -237,18 +240,20 @@ void minimax(int board[][w_], long int score[], int who, int currentCheck, int i
 
 	//printBoard(newBoard); //debug
 
-	int nearWinP, nearWinC, rowPlayed, vertTrapP, vertTrapC;
+	int nearWinP, nearWinC, rowPlayed, vTrapP, vTrapC, hTrapP, hTrapC;
 
 	if (iter <= MAX_ITER)
 	{
 		for (int i = 0; i < w_; i++)
 		{
+			//play in the center on the first turn
 			if (turn <= 1)
 			{
 				score[w_ / 2] += 1000000;
 				break;
 			}
 
+			//immediate block or win
 			if (iter == 0 && i == 0)
 			{
 				nearWinC = nearWinDetect(newBoard, cDisc); //checks for immediate possibility to win
@@ -266,37 +271,56 @@ void minimax(int board[][w_], long int score[], int who, int currentCheck, int i
 				}
 			}
 
+
 			rowPlayed = playMove(newBoard, i, currentCheck, turn);
 
 			if (rowPlayed != -1)
 			{
 				if (winDetect(newBoard, rowPlayed, i, cDisc)) //checks computer win
 				{
+					//if (iter == 0)
+						//score[i] += 100000;
+					//else
+
 						//score[i] += (MAX_ITER - iter + 1) / (iter + 1);
-						score[i] += pow(7, (1.0*MAX_ITER) / iter);
+						score[i] += pow(4, 1.0*MAX_ITER - iter);
+
 				}
 
 
 				else if (winDetect(newBoard, rowPlayed, i, pDisc)) //checks player win
 				{
+					//if (iter == 1)
+						//score[i] -= 10000
+					//else
 						//score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
-						score[i] += pow(7, (1.0*MAX_ITER) / iter);
+						score[i] += pow(4, MAX_ITER - iter);
+					
 				}
 
 
 				else //if no wins were found
 				{
-					/*if (turn >= 8)
+					if (turn >= 3)
 					{
-						vertTrapC = vertTrapDetect(board, cDisc);
-						vertTrapP = vertTrapDetect(board, pDisc);
+						//hTrapC = hTrapDetect(board, cDisc);
+						hTrapP = hTrapDetect(board, pDisc);
 
-						if (vertTrapC != -1) //checks for a vertical trap in favor of the computer
-							score[vertTrapC] += pow(6, (1.0*MAX_ITER) / iter);
+						if (hTrapP != -1) 
+							score[i] -= pow(6, MAX_ITER - iter);
+					}
+					
+					if (turn >= 12)
+					{
+						vTrapC = vTrapDetect(board, cDisc);
+						vTrapP = vTrapDetect(board, pDisc);
 
-						if (vertTrapP != -1) //checks for a vertical trap in favor of the player
-							score[vertTrapP] -= pow(6, (1.0*MAX_ITER) / iter);
-					}*/
+						if (vTrapC != -1) //checks for a vertical trap in favor of the computer
+							score[vTrapC] += pow(3, MAX_ITER - iter);
+
+						if (vTrapP != -1) //checks for a vertical trap in favor of the player
+							score[vTrapP] -= pow(3, MAX_ITER - iter);
+					}
 
 
 					if (currentCheck == cDisc)
@@ -404,7 +428,7 @@ int nearWinDetect(int board[][w_], int who)
 
 
 
-int vertTrapDetect(int board[][w_], int who)
+int vTrapDetect(int board[][w_], int who)
 {
 	int rowPlayed1, rowPlayed2;
 	int prev;
@@ -440,6 +464,35 @@ int vertTrapDetect(int board[][w_], int who)
 	}
 
 	return -1;
+}
+
+
+
+int hTrapDetect(int board[][w_], int who)
+{
+	int count;
+
+	for (int r = h_ - 1; r >= 0; r--)
+	{
+		count = 0;
+		for (int c = 0; c < w_; c++)
+		{
+			if (count == 0 || count == 4)
+			{
+				if (board[r][c] == nDisc) count++;
+				else count = 0;
+			}
+			else if (count > 0 && count < 4)
+			{
+				if (board[r][c] == who) count++;
+				else count = 0;
+			}
+			else if (count == 5);
+			return c - 1;
+		}
+	}
+	if (count < 5) return -1;
+	else return w_ - 1;
 }
 
 
@@ -682,7 +735,7 @@ void printScreen(int board[][w_], long int score[])
 	cout << "CONNECT 4!\n";
 	printPlayerColors();
 	printBoard(board);
-	//printScore(score);
+	printScore(score);
 	cout << "\n";
 }
 
