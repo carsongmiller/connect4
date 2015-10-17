@@ -7,20 +7,12 @@
 
 TO DO:
 -shallower recursion beginning, allow deeper as game goes on
--weigh certain situations at certain situations in the game more heavily
 -when the board is symmetrical, the scores for each column should be symmetrical (fixed)
 -consider adding a small bit of randomness into minimax
 	-like if two options are both very good and within %20 of eachother or something
 	-add a chance that the "worse" one is chosen
+
 -weigh scores better (possibly fixed)
-
--consider: not sure whether to use an if-if statement or an if-else when checking for vert traps (in minimax)
-	-currently using if-if
-
--consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
--this would be overwritten by logic that makes minimax go shallower at the beginning
-
--add print functions to clean up main()
 
 */
 
@@ -31,6 +23,7 @@ TO DO:
 #include <stdlib.h>
 #include <cstdlib>
 #include <string>
+#include <cmath>
 
 using namespace std;
 
@@ -40,7 +33,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-int MAX_ITER = 6;
+int MAX_DEPTH;
 
 
 //Values for SetConsoleTextAttribute()
@@ -77,13 +70,16 @@ bool winDetect(int board[][w_], int r, int c, int who);
 int nearWinDetect(int board[][w_], int who);
 
 //checks if "who" has two places they could win stacked on top of eachother (returns column)
-int vTrapDetect(int board[][w_], int who);
+bool vTrapDetect(int board[][w_], int who);
 
 //checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
-int hTrapDetect(int board[][w_], int who);
+bool hTrapDetect(int board[][w_], int who);
+
+//checks if playing in a place would create a win for the other player
+bool createLoss(int board[][w_]);
 
 //determines the best move for "who"
-void minimax(int board[][w_], long int score[], int who, int currentCheck, int iter, int turn);
+void minimax(int board[][w_], long int score[], int &tempScore, int who, int currentCheck, int iter, int turn);
 
 //prints the board
 void printBoard(int board[][w_]);
@@ -144,6 +140,7 @@ int main()
 	int rowPlayed; //stores the row in which the last disc was played
 	int colPlayed; //stores the column in which the last disc was played
 	int turn; //keeps track of which turn # it is
+	int tempScore = 0;
 
 	while (newGame)
 	{
@@ -167,6 +164,8 @@ int main()
 
 		while (cont)
 		{
+			MAX_DEPTH = (turn / 15) + 6;
+
 			printScreen(board, score);
 
 			scoreReset(score);
@@ -175,7 +174,7 @@ int main()
 			cout << "Now its' the computer's turn\n\n";
 			cout << "thinking ...\n\n";
 
-			minimax(board, score, cDisc, cDisc, 0, turn);
+			minimax(board, score, tempScore, cDisc, cDisc, 0, turn);
 
 			rankScores(score, rankedScore);
 
@@ -233,16 +232,16 @@ int main()
 
 
 
-void minimax(int board[][w_], long int score[], int who, int currentCheck, int iter, int turn)
+void minimax(int board[][w_], long int score[], int &tempScore, int who, int currentCheck, int iter, int turn)
 {
 	int newBoard[h_][w_];
 	copyBoard(board, newBoard);
 
 	//printBoard(newBoard); //debug
 
-	int nearWinP, nearWinC, rowPlayed, vTrapP, vTrapC, hTrapP, hTrapC;
+	int nearWinP, nearWinC, rowPlayed, vTrap, hTrap;
 
-	if (iter <= MAX_ITER)
+	if (iter <= MAX_DEPTH)
 	{
 		for (int i = 0; i < w_; i++)
 		{
@@ -276,63 +275,57 @@ void minimax(int board[][w_], long int score[], int who, int currentCheck, int i
 
 			if (rowPlayed != -1)
 			{
-				if (winDetect(newBoard, rowPlayed, i, cDisc)) //checks computer win
+				//printScreen(newBoard, score);
+				if (winDetect(newBoard, rowPlayed, i, currentCheck)) //checks for a win
 				{
-					//if (iter == 0)
-						//score[i] += 100000;
-					//else
-
-						//score[i] += (MAX_ITER - iter + 1) / (iter + 1);
-						score[i] += pow(4, 1.0*MAX_ITER - iter);
-
+					if(currentCheck == cDisc)
+						tempScore += pow(4, 1.0*MAX_DEPTH - iter);
+					else
+						tempScore -= pow(3, 1.0*MAX_DEPTH - iter);
 				}
 
 
-				else if (winDetect(newBoard, rowPlayed, i, pDisc)) //checks player win
+			else //if no wins were found
 				{
-					//if (iter == 1)
-						//score[i] -= 10000
-					//else
-						//score[i] -= (MAX_ITER - iter + 1) / (iter + 1);
-						score[i] += pow(4, MAX_ITER - iter);
-					
-				}
-
-
-				else //if no wins were found
-				{
-					if (turn >= 3)
+					if (turn >= 2 && turn < 20)
 					{
-						//hTrapC = hTrapDetect(board, cDisc);
-						hTrapP = hTrapDetect(board, pDisc);
+						if (hTrapDetect(newBoard, currentCheck))
+						{
+							//cout << hTrap << "\t" << i << "\t" << iter << endl;
+						
+								if(currentCheck == cDisc)
+									tempScore += pow(5, MAX_DEPTH - iter);
+								else
+									tempScore -= pow(4, MAX_DEPTH - iter);
+						}
 
-						if (hTrapP != -1) 
-							score[i] -= pow(6, MAX_ITER - iter);
-					}
-					
-					if (turn >= 12)
-					{
-						vTrapC = vTrapDetect(board, cDisc);
-						vTrapP = vTrapDetect(board, pDisc);
-
-						if (vTrapC != -1) //checks for a vertical trap in favor of the computer
-							score[vTrapC] += pow(3, MAX_ITER - iter);
-
-						if (vTrapP != -1) //checks for a vertical trap in favor of the player
-							score[vTrapP] -= pow(3, MAX_ITER - iter);
+						/*if (turn >= 20)
+						{
+							if (vTrapDetect(board, currentCheck)) //checks for a vertical trap in favor of the computer
+							{
+								if (currentCheck == cDisc)
+									tempScore += pow(3, MAX_DEPTH - iter);
+								else
+									tempScore -= pow(3, MAX_DEPTH - iter);
+							}
+						}*/
 					}
 
-
-					if (currentCheck == cDisc)
-						currentCheck = pDisc;
-					else if (currentCheck == pDisc)
-						currentCheck = cDisc;
-
-					minimax(newBoard, score, who, currentCheck, iter + 1, turn);
+					if(currentCheck == cDisc)
+						minimax(newBoard, score, tempScore, who, pDisc, iter + 1, turn);
+					else
+						minimax(newBoard, score, tempScore, who, cDisc, iter + 1, turn);
 				}
 			}
 
 			unPlayMove(newBoard, i, turn);
+
+			if (iter == 0)
+			{
+				score[i] = tempScore;
+				tempScore = 0;
+			}
+
 		}
 	}
 }
@@ -410,16 +403,18 @@ int nearWinDetect(int board[][w_], int who)
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed = playMove(board, i, who, turn);
-
-		if (winDetect(board, rowPlayed, i, who))
+		if (rowPlayed != -1)
 		{
-			unPlayMove(board, i, turn);
-			return i;
-		}
+			if (winDetect(board, rowPlayed, i, who))
+			{
+				unPlayMove(board, i, turn);
+				return i;
+			}
 
-		else
-		{
-			unPlayMove(board, i, turn);
+			else
+			{
+				unPlayMove(board, i, turn);
+			}
 		}
 	}
 
@@ -428,7 +423,7 @@ int nearWinDetect(int board[][w_], int who)
 
 
 
-int vTrapDetect(int board[][w_], int who)
+bool vTrapDetect(int board[][w_], int who)
 {
 	int rowPlayed1, rowPlayed2;
 	int prev;
@@ -450,7 +445,7 @@ int vTrapDetect(int board[][w_], int who)
 				setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
 				unPlayMove(board, i, turn);
 				unPlayMove(board, i, turn);
-				return i;
+				return true;
 			}
 
 			setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
@@ -463,14 +458,18 @@ int vTrapDetect(int board[][w_], int who)
 			unPlayMove(board, i, turn);
 	}
 
-	return -1;
+	return false;
 }
 
 
 
-int hTrapDetect(int board[][w_], int who)
+bool hTrapDetect(int board[][w_], int who)
 {
 	int count;
+	int notWho;
+
+	if (who == pDisc) notWho = cDisc;
+	else notWho = pDisc;
 
 	for (int r = h_ - 1; r >= 0; r--)
 	{
@@ -479,20 +478,20 @@ int hTrapDetect(int board[][w_], int who)
 		{
 			if (count == 0 || count == 4)
 			{
-				if (board[r][c] == nDisc) count++;
+				if (board[r][c] == nDisc && (board[r+1][c] == cDisc || board[r+1][c] == pDisc || !isValidCell(board, r+1, c))) count++;
 				else count = 0;
 			}
 			else if (count > 0 && count < 4)
 			{
 				if (board[r][c] == who) count++;
-				else count = 0;
+				else if (board[r][c] == notWho) count = 0;
 			}
-			else if (count == 5);
-			return c - 1;
+			else if (count == 5)
+				return true;
 		}
 	}
-	if (count < 5) return -1;
-	else return w_ - 1;
+	if (count < 5) return false;
+	else return true;
 }
 
 
