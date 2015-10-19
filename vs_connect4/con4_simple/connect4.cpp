@@ -75,9 +75,6 @@ bool vTrapDetect(int board[][w_], int who);
 //checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
 bool hTrapDetect(int board[][w_], int who);
 
-//checks if playing in a place would create a win for the other player
-bool createLoss(int board[][w_]);
-
 //determines the best move for "who"
 void minimax(int board[][w_], long int score[], int &tempScore, int who, int currentCheck, int iter, int turn);
 
@@ -735,6 +732,7 @@ void printScreen(int board[][w_], long int score[])
 	printPlayerColors();
 	printBoard(board);
 	printScore(score);
+	//cout << "MAX_DEPTH: " << MAX_DEPTH;
 	cout << "\n";
 }
 

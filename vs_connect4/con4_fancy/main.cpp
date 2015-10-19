@@ -1,31 +1,18 @@
-//connect4
-//Carson Miller
-//10-7-2015
-
-
-/*
-
-Things to modify:
--fix winDetect() (I think it's working now)
--shallower recursion beginning, allow deeper as game goes on
--weigh certain situations at certain situations in the game more heavily
--when the board is symmetrical, the scores for each column should be symmetrical
--consider adding a small bit of randomness into minimax
--like if two options are both very good and within %20 of eachother or something
--add a chance that the "worse" one is chosen
--weigh scores better
--consider: run through minimax until the first instance of a win is found, then go some certain number of iterations deeper
--this would be overwritten by logic that makes minimax go shallower at the beginning
-
--fix huge memory leak in the fancy version
-
-*/
-
-#include "board.h"
 #include "brain.h"
-
+#include "board.h"
+#include <iostream>
+#include <Windows.h>
+#include <string>
+#include <stdlib.h>
+#include <cstdlib>
+#include <cmath>
 
 using namespace std;
+
+
+const int w_ = 7, h_ = 6;
+const int MAX_DEPTH = 4;
+
 
 int main()
 {
@@ -33,110 +20,103 @@ int main()
 	char whoFirst; //who will go first
 	int moveChoice; //human player's move choice
 	char yn; //takes input from player as to whether they want to play again
+	int rowPlayed; //stores the row in which the last disc was played
+	int colPlayed; //stores the column in which the last disc was played
+	int turn; //keeps track of which turn # it is
+	int tempScore = 0;
 
-	int w_ = 7, h_ = 6;
-	int MAX_ITER = 6;
+	Board board(h_, w_);
+	Brain brain(h_, w_, MAX_DEPTH);
 
-	Board board(w_, h_);
-	Brain brain(MAX_ITER, w_, h_);
+	const int BLACK = 0;
+	const int BLUE = 1;
+	const int GREEN = 2;
+	const int CYAN = 3;
+	const int RED = 4;
+	const int MAGENTA = 5;
+	const int BROWN = 6;
+	const int LIGHTGRAY = 7;
+	const int DARKGRAY = 8;
+	const int LIGHTBLUE = 9;
+	const int LIGHTGREEN = 10;
+	const int LIGHTCYAN = 11;
+	const int LIGHTRED = 12;
+	const int LIGHTMAGENTA = 13;
+	const int YELLOW = 14;
+	const int WHITE = 15;
 
 	while (newGame)
 	{
+		turn = 0;
+
+
+		board.boardInit();
+		brain.scoreReset();
+
 		//First output of the program:
 		system("cls");
 
-		cout << "FANCY CONNECT 4!\n\nWho should go first? (m for me, c for computer): ";
+		cout << "CONNECT 4!\n\nWho should go first? (m for me, c for computer): ";
 		cin >> whoFirst;
 
 		if (whoFirst == 'm' || whoFirst == 'M')
 		{
-			board.printBoard();
-
-			validMove = false;
-			while (!validMove)
-			{
-				cout << "Where would you like to go? (enter column number): ";
-				cin >> moveChoice;
-
-				if (!board.playMove(moveChoice - 1, board.getDisc('p')))
-					cout << "There is no space in that column, choose a different one\n\n";
-
-				if (moveChoice > w_)
-					cout << "There is no column " << moveChoice << ". Please choose a column between 1 and " << w_ << "\n\n";
-
-				else
-					validMove = true;
-			}
+			board.printScreen();
+			board.playerMove(turn, rowPlayed, colPlayed);
 		}
-
-		system("cls");
-		cout << "CONNECT 4!\n\n\n";
-		board.printBoard();
 
 		//MAIN GAME LOOP
 
 		while (cont)
 		{
-			//reset the score of each column to 0 at the beginning of each turn
+			board.printScreen(brain);
+
 			brain.scoreReset();
-			brain.rankScoreReset();
+			brain.rankedScoreReset();
 
 			cout << "Now its' the computer's turn\n\n";
 			cout << "thinking ...\n\n";
 
-			brain.minimax(board, board.getDisc('c'), board.getDisc('c'), 0);
+			brain.minimax(board, tempScore, board.getDisc('c'), board.getDisc('c'), 0, turn);
+
+			brain.rankScores();
 
 
 			cout << endl << endl;
 
-				brain.rankScoreReset();
-				brain.rankScores();
 
 			//now the computer will make its move
-
-				for (int i = 0; i < w_; i++)
+			for (int i = 0; i < w_; i++)
+			{
+				rowPlayed = board.playMove(brain.getRankedScore(i), board.getDisc('c'), turn);
+				if (rowPlayed != -1)
 				{
-					if (board.playMove(brain.getRankScore(i), board.getDisc('c')))
-						break;
+					colPlayed = brain.getRankedScore(i);
+					break;
 				}
+			}
 
+			board.printScreen(brain);
 
-			system("cls");
-			cout << "CONNECT 4!\n\n\n";
-
-			//printing the score array for debugging
-				for (int i = 0; i < w_; i++)
-					cout << brain.getScore(i) << "\t";
-
+			cout << "The computer played in column ";
+			board.printColor(colPlayed + 1, GREEN);
 			cout << "\n";
 
-			board.printBoard();
 
-				if (brain.winDetect(board, board.getDisc('c')))
-					cout << "\nThe computer wins!\n";
+			if (brain.winDetect(board, rowPlayed, colPlayed, board.getDisc('c')))
+			{
+				cout << "\nThe computer wins!\n";
+				break;
+			}
 
 
 			//now the player's turn
-			//Player chosing his move
-				validMove = false;
-				while (!validMove)
-				{
-					cout << "Where would you like to go? (enter column number): ";
-					cin >> moveChoice;
+			board.playerMove(turn, rowPlayed, colPlayed);
 
-					if (!board.playMove(moveChoice - 1, board.getDisc('p')))
-						cout << "There is no space in that column, choose a different one\n";
-					else
-						validMove = true;
-				}
-
-
-			system("cls");
-			cout << "CONNECT 4!\n\n\n";
-			board.printBoard();
+			board.printScreen(brain);
 
 			//detecting a player win	
-			if (brain.winDetect(board, board.getDisc('p')))
+			if (brain.winDetect(board, rowPlayed, colPlayed - 1, board.getDisc('p')))
 			{
 				cout << "\nYou win!\n";
 				break;

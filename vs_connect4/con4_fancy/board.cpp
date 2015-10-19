@@ -1,101 +1,192 @@
 #include "board.h"
 #include "brain.h"
+#include <iostream>
+#include <Windows.h>
+#include <string>
+#include <stdlib.h>
+#include <cstdlib>
+#include <cmath>
 
 using namespace std;
 
-Board::Board(int w, int h)
+Board::Board(int h, int w)
 {
 	w_ = w;
 	h_ = h;
-
-	board = new int*[h_];
-	for (int i=0; i<h_; i++)
-		board[i] = new int[w_];
-
-
-	for (int r = 0; r < h_; r++)
-	{
-		for (int c = 0; c < w_; c++)
-		{
-			board[r][c] = nDisc;
-		}
-	}
+	boardInit();
 }
 
 
 
-Board::Board(int w, int h, int disc)
+Board::Board()
 {
-	w_ = w;
-	h_ = h;
-
-	board = new int*[h_];
-	for (int i = 0; i<h_; i++)
-		board[i] = new int[w_];
-
-	for (int r = 0; r < h_; r++)
-	{
-		for (int c = 0; c < w_; c++)
-		{
-			board[r][c] = disc;
-		}
-	}
+	w_ = 7;
+	h_ = 6;
+	boardInit();
 }
 
 
 
 Board::Board(Board& old)
 {
-	w_ = old.getW();
-	h_ = old.getH();
-	
-	board = new int*[h_];
+	this->w_ = old.w_;
+	this->h_ = old.h_;
+
+	this->board = new int*[h_];
 	for (int i = 0; i < h_; i++)
-		board[i] = new int[w_];
+		this->board[i] = new int[w_];
 
 	for (int r = 0; r < h_; r++)
-	{
 		for (int c = 0; c < w_; c++)
-		{
-			board[r][c] = old.getCell(r, c);
-		}
-	}
+			this->board[r][c] = old.board[r][c];
 }
 
 
 
-bool Board::playMove(int col, int who)
+Board::~Board()
 {
-	bool open = false;
+	for (int i = 0; i < h_; i++)
+		delete[] board[i];
+
+	delete[] board;
+}
+
+
+
+int Board::playMove(int col, int who, int &turn)
+{
 	for (int i = h_ - 1; i >= 0; i--)
 	{
-		if (board[i][col] == 0)
+		if (board[i][col] == nDisc)
 		{
-			open = true;
 			board[i][col] = who;
-			break;
+			turn++;
+			return i;
 		}
 	}
 
-	return open;
+	return -1;
 }
 
 
 
-bool Board::playMove_NB(int col, int who)
+bool Board::unPlayMove(int col, int &turn)
 {
-	bool open = false;
-	for (int i = h_ - 1; i >= 0; i--)
+	for (int i = h_ - 1; i > 0; i--)
 	{
-		if (newBoard[i][col] == 0)
+		if (board[i][col] != nDisc && board[i - 1][col] == nDisc)
 		{
-			open = true;
-			newBoard[i][col] = who;
-			break;
+			board[i][col] = nDisc;
+			turn--;
+			return true;
+		}
+		else if (i == 1 && board[0][col] != nDisc)
+		{
+			board[0][col] = nDisc;
+			turn--;
+			return true;
 		}
 	}
 
-	return open;
+	return false;
+}
+
+
+
+char Board::getChar(int r, int c)
+{
+	if (board[r][c] == nDisc)
+		return ' ';
+
+	else if (board[r][c] == pDisc || board[r][c] == cDisc)
+		return 'O';
+
+	else
+		return 'X'; //something went wrong
+}
+
+
+
+/*void Board::copyBoard(int newBoard[][w_])
+{
+for (int r = 0; r < h_; r++)
+{
+for (int c = 0; c < w_; c++)
+{
+newBoard[r][c] = board[r][c];
+}
+}
+}*/
+
+
+
+void Board::playerMove(int &turn, int &rowPlayed, int &colPlayed)
+{
+	bool isValid;
+
+	isValid = false;
+	cout << "Where would you like to go? (enter column number): ";
+	cin >> colPlayed;
+
+	while (!isValid)
+	{
+		if (colPlayed > w_ || colPlayed < 1)
+		{
+			cout << "There is no column " << colPlayed << ". Please choose a column between 1 and " << w_ << "\n\n";
+
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+		else
+			break;
+	}
+
+	while (!isValid)
+	{
+		rowPlayed = playMove(colPlayed - 1, pDisc, turn);
+
+		if (rowPlayed == -1)
+		{
+			cout << "There is no space in that column, choose a different one\n\n";
+
+			cout << "Where would you like to go? (enter column number): ";
+			cin >> colPlayed;
+		}
+
+		else
+			break;
+	}
+}
+
+
+
+/*
+
+PRINT FUNCTIONS
+
+*/
+
+
+
+void Board::printScreen(Brain brain)
+{
+	system("cls");
+	cout << "CONNECT 4!\n";
+	printPlayerColors();
+	printBoard();
+	brain.printScore();
+	cout << "\n";
+}
+
+
+
+void Board::printScreen()
+{
+	system("cls");
+	cout << "CONNECT 4!\n";
+	printPlayerColors();
+	printBoard();
+	cout << "\n";
 }
 
 
@@ -136,11 +227,11 @@ void Board::printBoard()
 		for (int c = 0; c < w_; c++)
 		{
 			//decide which disc to print
-			if (board[r][c] == 0)
+			if (board[r][c] == nDisc)
 				cout << getChar(r, c);
-			else if (board[r][c] == 1)
+			else if (board[r][c] == pDisc)
 				printColor(getChar(r, c), LIGHTRED);
-			else if (board[r][c] == 2)
+			else if (board[r][c] == cDisc)
 				printColor(getChar(r, c), LIGHTBLUE);
 
 			cout << "   |   ";
@@ -164,26 +255,24 @@ void Board::printBoard()
 
 
 
-char Board::getChar(int r, int c)
+void Board::printPlayerColors()
 {
-	if (board[r][c] == 0)
-		return ' ';
-	else if (board[r][c] == 1 || board[r][c] == 2)
-		return 'O';
-	else
-		return 'X'; //if something goes wrong
+	cout << "Player: ";
+	printColor('O', LIGHTRED);
+	cout << endl;
+	cout << "Computer: ";
+	printColor('O', LIGHTBLUE);
+	cout << endl;
 }
 
 
 
-void Board::printColor(std::string str, int color)
+void Board::printColor(string str, int color)
 {
 	SetConsoleTextAttribute(H, color);
 	cout << str;
 	SetConsoleTextAttribute(H, WHITE);
 }
-
-
 
 void Board::printColor(int i, int color)
 {
@@ -192,13 +281,52 @@ void Board::printColor(int i, int color)
 	SetConsoleTextAttribute(H, WHITE);
 }
 
-
-
 void Board::printColor(char c, int color)
 {
 	SetConsoleTextAttribute(H, color);
 	cout << c;
 	SetConsoleTextAttribute(H, WHITE);
+}
+
+
+
+void Board::boardInit()
+{
+	board = new int*[h_];
+	for (int i = 0; i < h_; i++)
+		board[i] = new int[w_];
+
+	for (int r = 0; r < h_; r++)
+	{
+		for (int c = 0; c < w_; c++)
+		{
+			board[r][c] = nDisc;
+		}
+	}
+}
+
+
+
+bool Board::isValidCell(int r, int c)
+{
+	if (r >= 0 && r < h_ && c >= 0 && c < w_)
+		return true;
+	else
+		return false;
+}
+
+
+
+int Board::setCell(int r, int c, int who)
+{
+	int prev = board[r][c];
+	if (isValidCell(r, c))
+	{
+		board[r][c] = who;
+		return prev;
+	}
+	else
+		return 0;
 }
 
 
@@ -210,100 +338,17 @@ int** Board::getBoard()
 
 
 
-int Board::getW()
+int Board::getDisc(char x)
 {
-	return w_;
-}
-
-
-
-void Board::setW(int w)
-{
-	w_ = w;
-}
-
-
-
-int Board::getH()
-{
-	return h_;
-}
-
-
-
-void Board::setH(int h)
-{
-	h_ = h;
-}
-
-
-
-int Board::getDisc(char c)
-{
-	if(c == 'n')
-		return nDisc;
-	else if (c == 'p')
-		return pDisc;
-	else if (c == 'c')
-		return cDisc;
-	else
-	{
-		cout << "Error: invalid character given to Board::getDisc()\n";
-		exit(1);
-	}
+	if (x == 'c') return cDisc;
+	else if (x == 'p') return pDisc;
+	else if (x == 'n') return nDisc;
+	else return -1;
 }
 
 
 
 int Board::getCell(int r, int c)
 {
-	return board[r][c];
-}
-
-
-
-void Board::setCell(int r, int c, int val)
-{
-	board[r][c] = val;
-}
-
-
-
-void Board::createNewBoard()
-{
-	newBoard = new int*[h_];
-	for (int i = 0; i < h_; i++)
-		newBoard[i] = new int[w_];
-
-	for (int r = 0; r < h_; r++)
-	{
-		for (int c = 0; c < w_; c++)
-		{
-			newBoard[r][c] = board[r][c];
-		}
-	}
-}
-
-
-
-int Board::getCell_NB(int r, int c)
-{
-	return newBoard[r][c];
-}
-
-
-
-void Board::setCell_NB(int r, int c, int val)
-{
-	newBoard[r][c] = val;
-}
-
-
-
-void Board::NB_delete()
-{
-	for (int i = 0; i < w_; i++)
-		delete[] newBoard[i];
-
-	delete[] newBoard;
+	if (isValidCell(r, c)) return board[r][c];
 }

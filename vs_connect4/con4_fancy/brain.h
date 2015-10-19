@@ -1,56 +1,72 @@
 #ifndef _BRAIN
 #define _BRAIN
 
-#include <string>
 #include <iostream>
-#include <windows.h>
+#include <Windows.h>
+#include <string>
+#include <stdlib.h>
 #include <cstdlib>
+#include <cmath>
+
+using namespace std;
 
 class Board;
 
 class Brain
 {
 private:
-	//Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-	int MAX_ITER;
-	int* score;
-	int* score_ranked;
-	int h_, w_;
-	bool placed;
+	long int *score; //stores minimax scores
+	long int *rankedScore; //stores minimax scores (ranked best to worst)
+	int MAX_DEPTH;
+	int w_, h_; //width and height of board
 
-	//pointer to be used in minimax
-	int** newBoard;
 
 public:
-	//Constructors
-	Brain(int max, int w, int h);
+	//CONSTRUCTORS
+	Brain(int h, int w, int max);
 
-	//detects if "who" has won in board[][]
-	bool winDetect(Board board, int who);
+	//checks if the disc at board[r][c] has won
+	bool winDetect(Board &board, int r, int c, int who);
 
-	//detects if "who" has won in newBoard[][]
-	bool winDetect_NB(Board board, int who);
+	//checks if "who" is one disc away from winning
+	int nearWinDetect(Board &board, int who);
 
-	//detects if "who" can win in one more move and returns where to play to block in newBoard[][]
-	int nearWinDetect(Board board, int who);
+	//checks if "who" has two places they could win stacked on top of eachother (returns column)
+	bool vTrapDetect(Board &board, int who);
+
+	//checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
+	bool hTrapDetect(Board &board, int who);
 
 	//determines the best move for "who"
-	void minimax(Board board, int who, int currentCheck, int iter);
+	void minimax(Board board, int &tempScore, int who, int currentCheck, int iter, int turn);
 
-	//resets the score for each column to 0
-	void scoreReset();
-
-	//accessor functions
-	int getScore(int col);
-
-	//ranks columns based on score
+	//ranks the scores of columns
 	void rankScores();
 
-	//resets all indexes of rankScore() to -1
-	void rankScoreReset();
+	//resets the score[] array
+	void scoreReset();
 
-	//returns the column at the given rank
-	int getRankScore(int rank);
+	//resets the rankedScore[] array
+	void rankedScoreReset();
+
+	//initializes score()
+	void scoreInit();
+
+	//initializes rankedScore()
+	void rankedScoreInit();
+
+	//prints the score[] array (mostly for debugging)
+	void printScore();
+
+
+
+	//ACCESSOR FUNCTIONS
+
+	//returns an entry of score[]
+	int getScore(int c);
+
+	//returns an entry of rankedScore[]
+	int getRankedScore(int c);
 };
 
 #endif
