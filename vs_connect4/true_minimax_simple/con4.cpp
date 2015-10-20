@@ -8,6 +8,8 @@
 TO DO:
 
 -Add alpha beta pruning
+-Program crashed when there was only one available column
+	-exact cause of the crash unknown
 
 */
 
@@ -102,9 +104,9 @@ BOARD MANIPULATION
 	int setCell(int board[][w_], int r, int c, int who);
 
 	//player choosing his move and making move
-	void humanTurn(int board[][w_], int &rowPlayed, int &colPlayed);
+	void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed);
 
-	void compTurn(int board[][w_], int &colPlayed, int &rowPlayed);
+	void compTurn(int board[][w_], int &rowPlayed, int &colPlayed);
 
 /*
 ---------------------------
@@ -141,8 +143,11 @@ OTHER HELPER FUNCTIONS
 	//checks if a cell is in bounds of board[][]
 	bool isValidCell(int board[][w_], int r, int c);
 
-	//Picks who goes first
+	//picks who goes first
 	int preGame();
+
+	//ignores any key presses that may have occured during computer's turn
+	void ignoreInput();
 
 
 
@@ -172,23 +177,25 @@ int main()
 		{
 			if (whosTurn == 1) //player's turn
 			{
-				humanTurn(board, rowPlayed, colPlayed);
+				playerTurn(board, rowPlayed, colPlayed);
 				printScreen(board);
 				if (printWin(board, rowPlayed, colPlayed, pDisc)) break;
 			}
 
 			else if (whosTurn == 2) //computer's turn
 			{
-				compTurn(board, colPlayed, rowPlayed);
+				compTurn(board, rowPlayed, colPlayed);
 				printScreen(board);
 				cout << "The computer played in column ";
-				printColor(colPlayed, GREEN);
+				printColor(colPlayed+1, GREEN);
 				cout << "\n\n";
 				if (printWin(board, rowPlayed, colPlayed, cDisc)) break;
 			}
 
 			if (whosTurn == 1) whosTurn = 2;
 			else whosTurn = 1;
+
+			turn++;
 		}
 
 		cout << "Would you like to play again? (y/n): ";
@@ -267,16 +274,10 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth)
 			if (winDetect(newBoard, R, C, minormax)) //checks for a win for original_caller
 			{
 				if (minormax == maximizer)
-				{
 					score[C] = 1000000;
-					break;
-				}
 
 				else
-				{
 					score[C] = -1000000;
-					break;
-				}
 			}
 
 			else if (depth == MAX_DEPTH)
@@ -581,16 +582,16 @@ bool unPlayMove(int board[][w_], int col)
 
 
 
-void compTurn(int board[][w_], int &colPlayed, int &rowPlayed)
+void compTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 {
 	cout << "COMPUTER'S TURN\n\nthinking ...";
 	colPlayed = minimax(board, cDisc, cDisc, 0);
-	rowPlayed = playMove(board, rowPlayed, cDisc);
+	rowPlayed = playMove(board, colPlayed, cDisc);
 }
 
 
 
-void humanTurn(int board[][w_], int &rowPlayed, int &colPlayed)
+void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 {
 	//takes care of most of a human player's turn
 
@@ -861,4 +862,10 @@ int preGame()
 			cin >> first;
 		}
 	}
+}
+
+
+void ignoreInput()
+{
+	
 }
