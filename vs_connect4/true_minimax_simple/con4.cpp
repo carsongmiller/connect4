@@ -110,9 +110,9 @@ BOARD MANIPULATION
 	int setCell(int board[][w_], int r, int c, int who);
 
 	//player choosing his move and making move
-	void playerMove(int board[][w_], int &rowPlayed, int &colPlayed);
+	void humanTurn(int board[][w_], int &rowPlayed, int &colPlayed);
 
-	void compTurn(int board[][w_], int &colPlayed);
+	void compTurn(int board[][w_], int &colPlayed, int &rowPlayed);
 
 /*
 ---------------------------
@@ -186,26 +186,25 @@ int main()
 	while (newGame)
 	{
 		boardInit(board);
-
 		whosTurn = preGame();
+		printScreen(board);
 
 		while (turn < w_*h_)
 		{
 			if (whosTurn == 1) //player's turn
 			{
-				printScreen(board);
-				playerMove(board, rowPlayed, colPlayed);
+				humanTurn(board, rowPlayed, colPlayed);
 				printScreen(board);
 				if (printWin(board, rowPlayed, colPlayed, pDisc)) break;
 			}
 
 			else if (whosTurn == 2) //computer's turn
 			{
-				printScreen(board);
-				compTurn(board, colPlayed);
+				compTurn(board, colPlayed, rowPlayed);
 				printScreen(board);
 				cout << "The computer played in column ";
 				printColor(colPlayed, GREEN);
+				cout << "\n\n";
 				if (printWin(board, rowPlayed, colPlayed, cDisc)) break;
 			}
 
@@ -699,16 +698,16 @@ bool unPlayMove(int board[][w_], int col)
 
 
 
-void compTurn(int board[][w_], int &colPlayed)
+void compTurn(int board[][w_], int &colPlayed, int &rowPlayed)
 {
-	int move;
 	cout << "COMPUTER'S TURN\n\nthinking ...";
-	colPlayed = playMove(board, minimax(board, cDisc, cDisc, 0), cDisc);
+	rowPlayed = minimax(board, cDisc, cDisc, 0);
+	colPlayed = playMove(board, rowPlayed, cDisc);
 }
 
 
 
-void playerMove(int board[][w_], int &rowPlayed, int &colPlayed)
+void humanTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 {
 	//takes care of most of a human player's turn
 
