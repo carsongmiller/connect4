@@ -22,6 +22,7 @@
     <ProjectGuid>{5FD0FE2E-9EAD-46BD-926D-8442725A8B81}</ProjectGuid>
     <RootNamespace>true_minimax</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>true_minimax_fancy</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -38,7 +38,7 @@ public:
 	bool hTrapDetect(Board &board, int who);
 
 	//determines the best move for "who"
-	void minimax(Board board, int &tempScore, int who, int currentCheck, int iter, int turn);
+	void minimax(Board &board, int &tempScore, int who, int currentCheck, int iter, int turn);
 
 	//ranks the scores of columns
 	void rankScores();

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-Board::Board(int h, int w)
+Board::Board(int h, int w) //overloaded constructor
 {
 	w_ = w;
 	h_ = h;
@@ -18,7 +18,7 @@ Board::Board(int h, int w)
 
 
 
-Board::Board()
+Board::Board() //default constructor
 {
 	w_ = 7;
 	h_ = 6;
@@ -27,7 +27,7 @@ Board::Board()
 
 
 
-Board::Board(Board& old)
+Board::Board(Board& old) //copy constructor
 {
 	this->w_ = old.w_;
 	this->h_ = old.h_;
@@ -43,7 +43,7 @@ Board::Board(Board& old)
 
 
 
-Board::~Board()
+Board::~Board() //destructor
 {
 	for (int i = 0; i < h_; i++)
 		delete[] board[i];
@@ -93,7 +93,7 @@ bool Board::unPlayMove(int col, int &turn)
 
 
 
-char Board::getChar(int r, int c)
+char Board::getChar(int r, int c) //returns the character representing the disc at the given index of board[][]
 {
 	if (board[r][c] == nDisc)
 		return ' ';
@@ -120,7 +120,7 @@ newBoard[r][c] = board[r][c];
 
 
 
-void Board::playerMove(int &turn, int &rowPlayed, int &colPlayed)
+void Board::playerMove(int &turn, int &rowPlayed, int &colPlayed) //takes care of most of a player's turn
 {
 	bool isValid;
 
@@ -162,13 +162,13 @@ void Board::playerMove(int &turn, int &rowPlayed, int &colPlayed)
 
 /*
 
-PRINT FUNCTIONS
+		PRINT FUNCTIONS
 
 */
 
 
 
-void Board::printScreen(Brain brain)
+void Board::printScreen(Brain brain) //if you want to print the scores for each column underneath the board
 {
 	system("cls");
 	cout << "CONNECT 4!\n";
@@ -180,7 +180,7 @@ void Board::printScreen(Brain brain)
 
 
 
-void Board::printScreen()
+void Board::printScreen() //if you don't want to see scores for columns
 {
 	system("cls");
 	cout << "CONNECT 4!\n";

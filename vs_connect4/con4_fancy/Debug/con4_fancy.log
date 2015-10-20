@@ -1,10 +1,7 @@
-﻿Build started 10/18/2015 6:52:47 PM.
-     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" on node 3 (Build target(s)).
+﻿Build started 10/20/2015 12:28:32 AM.
+     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" on node 4 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt board.cpp brain.cpp main.cpp
-         main.cpp
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\main.cpp(19): warning C4101: 'validMove': unreferenced local variable
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\main.cpp(21): warning C4101: 'moveChoice': unreferenced local variable
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt board.cpp brain.cpp
          brain.cpp
      1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(76): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
      1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(78): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
@@ -24,4 +21,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:10.83
+Time Elapsed 00:00:02.55

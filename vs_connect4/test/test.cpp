@@ -32,6 +32,7 @@ TO DO:
 #include <cstdlib>
 #include <string>
 #include <cmath>
+#include <climits>
 
 using namespace std;
 
@@ -149,133 +150,6 @@ int main()
 	int colPlayed; //stores the column in which the last disc was played
 	int turn; //keeps track of which turn # it is
 	int tempScore = 0;
-
-	while (newGame)
-	{
-		turn = 0;
-		initBoard(board);
-		scoreReset(score);
-
-		//First output of the program:
-		system("cls");
-
-		/*cout << "CONNECT 4!\n\nWho should go first? (m for me, c for computer): ";
-		cin >> whoFirst;
-
-		if (whoFirst == 'm' || whoFirst == 'M')
-		{
-			printScreen(board, score);
-			playerMove(board, score, turn, rowPlayed, colPlayed);
-		}*/
-
-		//MAIN GAME LOOP
-
-		while (cont)
-		{
-			printScreen(board, score);
-
-			scoreReset(score);
-			rankedScoreReset(rankedScore);
-
-			cout << "Now its' the computer's turn\n\n";
-			cout << "thinking ...\n\n";
-
-			minimax(board, score, tempScore, cDisc, cDisc, 0, turn);
-
-			rankScores(score, rankedScore);
-
-
-			cout << endl << endl;
-
-
-			//now the computer will make its move
-			for (int i = 0; i < w_; i++)
-			{
-				rowPlayed = playMove(board, rankedScore[i], cDisc, turn);
-				if (rowPlayed != -1)
-				{
-					colPlayed = rankedScore[i];
-					break;
-				}
-			}
-
-			printScreen(board, score);
-
-			cout << "The computer played in column ";
-			printColor(colPlayed + 1, GREEN);
-			cout << "\n";
-
-
-			if (winDetect(board, rowPlayed, colPlayed, cDisc))
-			{
-				cout << "\nComputer 1 wins!\n";
-				break;
-			}
-
-
-			//Computer 2
-
-
-			printScreen(board, score);
-
-			scoreReset(score);
-			rankedScoreReset(rankedScore);
-
-			cout << "Now its' the computer's turn\n\n";
-			cout << "thinking ...\n\n";
-
-			minimax(board, score, tempScore, pDisc, pDisc, 0, turn);
-
-			rankScores(score, rankedScore);
-
-
-			cout << endl << endl;
-
-
-			//now the computer will make its move
-			for (int i = 0; i < w_; i++)
-			{
-				rowPlayed = playMove(board, rankedScore[i], pDisc, turn);
-				if (rowPlayed != -1)
-				{
-					colPlayed = rankedScore[i];
-					break;
-				}
-			}
-
-			printScreen(board, score);
-
-			cout << "The computer played in column ";
-			printColor(colPlayed + 1, GREEN);
-			cout << "\n";
-
-
-			if (winDetect(board, rowPlayed, colPlayed, pDisc))
-			{
-				cout << "\nComputer 2 wins!\n";
-				break;
-			}
-
-
-			/*//now the player's turn
-			playerMove(board, score, turn, rowPlayed, colPlayed);
-
-			printScreen(board, score);
-
-			//detecting a player win	
-			if (winDetect(board, rowPlayed, colPlayed - 1, pDisc))
-			{
-				cout << "\nYou win!\n";
-				break;
-			}*/
-
-		}
-
-		cout << "Would you like to play again? (y/n): ";
-		cin >> yn;
-		if (yn != 'y' && yn != 'Y')
-			newGame = false;
-	}
 
 	return 0;
 }

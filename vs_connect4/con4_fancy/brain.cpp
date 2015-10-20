@@ -21,7 +21,7 @@ Brain::Brain(int h, int w, int max)
 
 
 
-void Brain::minimax(Board board, int &tempScore, int who, int currentCheck, int iter, int turn)
+void Brain::minimax(Board &board, int &tempScore, int who, int currentCheck, int iter, int turn)
 {
 	Board* newBoard = new Board;
 	*newBoard = board;

@@ -78,6 +78,9 @@ bool hTrapDetect(int board[][w_], int who);
 //determines the best move for "who"
 void minimax(int board[][w_], long int score[], int &tempScore, int who, int currentCheck, int iter, int turn);
 
+//checks if playing in the given column would create a win for the other player
+bool createLoss(int board[][w_], int col, int who);
+
 //prints the board
 void printBoard(int board[][w_]);
 
@@ -121,7 +124,6 @@ int setCell(int board[][w_], int r, int c, int who);
 
 //player choosing his move and making move
 void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed);
-
 
 
 
@@ -284,6 +286,9 @@ void minimax(int board[][w_], long int score[], int &tempScore, int who, int cur
 
 			else //if no wins were found
 				{
+					if (currentCheck == cDisc && createLoss(board, i, who))
+						tempScore -= 10000;
+
 					if (turn >= 2 && turn < 20)
 					{
 						if (hTrapDetect(newBoard, currentCheck))
@@ -429,28 +434,28 @@ bool vTrapDetect(int board[][w_], int who)
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed1 = playMove(board, i, who, turn); //play first move
-		prev = setCell(board, rowPlayed1 - 1, i, nDisc); //avoids vertical win detection (cleared cell 1)
+		prev = setCell(board, rowPlayed1 - 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
 
 		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
 		{
-			setCell(board, rowPlayed1 - 1, i, prev); //replacing cleared cell 1
+			setCell(board, rowPlayed1 - 1, i, prev); //replacing "cleared cell 1"
 			rowPlayed2 = playMove(board, i, who, turn); //play second move
-			prev = setCell(board, rowPlayed2 - 1, i, nDisc); //avoids vertical win detection (cleared cell 2)
+			prev = setCell(board, rowPlayed2 - 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
 
 			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
 			{
-				setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
+				setCell(board, rowPlayed2 - 1, i, prev); //replacing "cleared cell 2"
 				unPlayMove(board, i, turn);
 				unPlayMove(board, i, turn);
 				return true;
 			}
 
-			setCell(board, rowPlayed2 - 1, i, prev); //replacing cleared cell 2
+			setCell(board, rowPlayed2 - 1, i, prev); //replacing "cleared cell 2"
 			if(rowPlayed2 != -1)
 				unPlayMove(board, i, turn);
 		}
 
-		setCell(board, rowPlayed1 - 1, i, prev); //replacing cleared cell 1
+		setCell(board, rowPlayed1 - 1, i, prev); //replacing "cleared cell 1"
 		if(rowPlayed1 != -1)
 			unPlayMove(board, i, turn);
 	}
@@ -475,6 +480,7 @@ bool hTrapDetect(int board[][w_], int who)
 		{
 			if (count == 0 || count == 4)
 			{
+				//open spaces on the sides must also have an open space beneath them
 				if (board[r][c] == nDisc && (board[r+1][c] == cDisc || board[r+1][c] == pDisc || !isValidCell(board, r+1, c))) count++;
 				else count = 0;
 			}
@@ -491,6 +497,41 @@ bool hTrapDetect(int board[][w_], int who)
 	else return true;
 }
 
+
+
+bool createLoss(int board[][w_], int col, int who)
+{
+	int rowPlayed1, rowPlayed2, notWho;
+	int falseTurn = 0;
+
+	if (who == pDisc) notWho = cDisc;
+	else notWho = pDisc;
+
+	for (int c1 = 0; c1 < w_; c1++)
+	{
+		rowPlayed1 = playMove(board, c1, who, falseTurn);
+		if (rowPlayed1 != -1)
+		{
+			for (int c2 = 0; c2 < w_; c2++)
+			{
+				rowPlayed2 = playMove(board, c2, notWho, falseTurn);
+				if (rowPlayed2 != -1)
+				{
+					if (winDetect(board, rowPlayed2, c2, notWho) == true)
+					{
+						unPlayMove(board, c2, falseTurn);
+						unPlayMove(board, c1, falseTurn);
+						return true;
+					}
+					unPlayMove(board, c2, falseTurn);
+				}
+			}
+			unPlayMove(board, c1, falseTurn);
+		}
+	}
+
+	return false;
+}
 
 
 
@@ -594,6 +635,8 @@ void copyBoard(int board[][w_], int newBoard[][w_])
 
 void playerMove(int board[][w_], long int score[], int &turn, int &rowPlayed, int &colPlayed)
 {
+	//takes care of most of a human player's turn
+
 	bool isValid;
 	
 	isValid = false;
