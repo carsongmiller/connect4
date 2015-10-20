@@ -6,13 +6,8 @@
 /*
 
 TO DO:
--shallower recursion beginning, allow deeper as game goes on
--when the board is symmetrical, the scores for each column should be symmetrical (fixed)
--consider adding a small bit of randomness into minimax
--like if two options are both very good and within %20 of eachother or something
--add a chance that the "worse" one is chosen
 
--weigh scores better (possibly fixed)
+-Add alpha beta pruning
 
 */
 
@@ -34,7 +29,7 @@ const int pDisc = 1, cDisc = 2, nDisc = -1;
 //width and height variables
 const int w_ = 7, h_ = 6;
 //Base number of maximum iterations (depending on the stage in the game, recursion may go more or less deep)
-int MAX_DEPTH = 5;
+const int MAX_DEPTH = 5;
 
 
 //Values for SetConsoleTextAttribute()
@@ -69,9 +64,6 @@ ALGORITHMS/HEURISTICS
 
 	//ultimate returns column of the best move for the computer
 	int minimax(int board[][w_], int maximizer, int minormax, int depth);
-
-	//determines the best move for "who"
-	//void OLDminimax(int board[][w_], int score[], int &tempScore, int who, int currentCheck, int iter);
 
 	//checks if the disc at board[r][c] has won
 	bool winDetect(int board[][w_], int r, int c, int who);
@@ -124,16 +116,12 @@ PRINT FUNCTIONS
 	void printBoard(int board[][w_]);
 
 	//takes care of printing most of the screen
-	//void OLDprintScreen(int board[][w_], int score[]);
 	void printScreen(int board[][w_]);
 
 	//prints a given string of text in a different color then changes the text color back to white (overloaded for string, int, and char arguments)
 	void printColor(string str, int color);
 	void printColor(int i, int color);
 	void printColor(char c, int color);
-
-	//prints the score[] array (mostly for debugging)
-	void printScore(int score[]);
 
 	//prints out which player is which color
 	void printPlayerColors();
@@ -149,15 +137,6 @@ OTHER HELPER FUNCTIONS
 
 	//returns an appropriate symbol for the given index when given the board
 	char getChar(int board[][w_], int r, int c);
-
-	//ranks the scores of columns
-	void rankScores(int score[], int rankedScore[]);
-
-	//resets the score[] array
-	void scoreReset(int score[]);
-
-	//resets the rankedScore[] array
-	void rankedScoreReset(int rankedScore[]);
 
 	//checks if a cell is in bounds of board[][]
 	bool isValidCell(int board[][w_], int r, int c);
@@ -288,9 +267,16 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth)
 			if (winDetect(newBoard, R, C, minormax)) //checks for a win for original_caller
 			{
 				if (minormax == maximizer)
+				{
 					score[C] = 1000000;
+					break;
+				}
+
 				else
+				{
 					score[C] = -1000000;
+					break;
+				}
 			}
 
 			else if (depth == MAX_DEPTH)
@@ -346,109 +332,6 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth)
 		else return score[low];
 	}
 }
-
-
-
-/*void OLDminimax(int board[][w_], int score[], int &tempScore, int who, int currentCheck, int iter, int turn)
-{
-	int newBoard[h_][w_];
-	copyBoard(board, newBoard);
-
-	//printBoard(newBoard); //debug
-
-	int nearWinP, nearWinC, rowPlayed, vTrap, hTrap;
-
-	if (iter <= MAX_DEPTH)
-	{
-		for (int i = 0; i < w_; i++)
-		{
-			//play in the center on the first turn
-			if (turn <= 1)
-			{
-				score[w_ / 2] += 1000000;
-				break;
-			}
-
-			//immediate block or win
-			if (iter == 0 && i == 0)
-			{
-				nearWinC = nearWinDetect(newBoard, cDisc); //checks for immediate possibility to win
-				if (nearWinC != -1)
-				{
-					score[nearWinC] += 1000000;
-					break;
-				}
-
-				nearWinP = nearWinDetect(newBoard, pDisc); //checks for immediate need to block
-				if (nearWinP != -1)
-				{
-					score[nearWinP] += 1000000;
-					break;
-				}
-			}
-
-
-			rowPlayed = playMove(newBoard, i, currentCheck, turn);
-
-			if (rowPlayed != -1)
-			{
-				//printScreen(newBoard, score);
-				if (winDetect(newBoard, rowPlayed, i, currentCheck)) //checks for a win
-				{
-					if (currentCheck == cDisc)
-						tempScore += pow(4, 1.0*MAX_DEPTH - iter);
-					else
-						tempScore -= pow(3, 1.0*MAX_DEPTH - iter);
-				}
-
-
-				else //if no wins were found
-				{
-					if (currentCheck == cDisc && createLoss(board, i, who))
-						tempScore -= 10000;
-
-					if (turn >= 2 && turn < 20)
-					{
-						if (hTrapDetect(newBoard, currentCheck))
-						{
-							//cout << hTrap << "\t" << i << "\t" << iter << endl;
-
-							if (currentCheck == cDisc)
-								tempScore += pow(5, MAX_DEPTH - iter);
-							else
-								tempScore -= pow(4, MAX_DEPTH - iter);
-						}
-
-						if (turn >= 20)
-						{
-							if (vTrapDetect(board, currentCheck)) //checks for a vertical trap in favor of the computer
-							{
-								if (currentCheck == cDisc)
-									tempScore += pow(3, MAX_DEPTH - iter);
-								else
-									tempScore -= pow(3, MAX_DEPTH - iter);
-							}
-						}
-					}
-
-					if (currentCheck == cDisc)
-						minimax(newBoard, score, tempScore, who, pDisc, iter + 1, turn);
-					else
-						minimax(newBoard, score, tempScore, who, cDisc, iter + 1, turn);
-				}
-			}
-
-			unPlayMove(newBoard, i, turn);
-
-			if (iter == 0)
-			{
-				score[i] = tempScore;
-				tempScore = 0;
-			}
-
-		}
-	}
-}*/
 
 
 
@@ -701,8 +584,8 @@ bool unPlayMove(int board[][w_], int col)
 void compTurn(int board[][w_], int &colPlayed, int &rowPlayed)
 {
 	cout << "COMPUTER'S TURN\n\nthinking ...";
-	rowPlayed = minimax(board, cDisc, cDisc, 0);
-	colPlayed = playMove(board, rowPlayed, cDisc);
+	colPlayed = minimax(board, cDisc, cDisc, 0);
+	rowPlayed = playMove(board, rowPlayed, cDisc);
 }
 
 
@@ -811,21 +694,6 @@ void printScreen(int board[][w_])
 
 
 
-/*
-void printScreen(int board[][w_], int score[])
-{
-	system("cls");
-	cout << "CONNECT 4!\n";
-	printPlayerColors();
-	printBoard(board);
-	printScore(score);
-	//cout << "MAX_DEPTH: " << MAX_DEPTH;
-	cout << "\n";
-}
-*/
-
-
-
 //Following code is pretty messy, but it works and makes a nice print out
 void printBoard(int board[][w_])
 {
@@ -885,15 +753,6 @@ void printBoard(int board[][w_])
 
 		cout << "\n";
 	}
-}
-
-
-
-void printScore(int score[])
-{
-	for (int i = 0; i < w_; i++)
-		cout << score[i] << "\t";
-	cout << "\n";
 }
 
 
@@ -959,37 +818,6 @@ OTHER HELPER FUNCTIONS
 
 
 
-void rankScores(int score[], int rankedScore[])
-{
-	bool placed;
-
-	rankedScore[0] = 0; //creates a base reference for the ranking
-
-	for (int i = 1; i < w_; i++) //keeps track of which index of the score[] array it's checking
-	{
-		placed = false; //makes sure a column is only ranked once
-		for (int n = 0; n < i; n++) //keeps track of which index of nextBest score[i] is being checked against
-		{
-			if (score[i] > score[rankedScore[n]])
-			{
-				for (int x = w_ - 1; x > n; x--) //shuffles up by one all indexes >= the one that needs to be changed
-				{
-					rankedScore[x] = rankedScore[x - 1];
-				}
-
-				rankedScore[n] = i;
-				placed = true;
-				break; //again makes sure a column is only ranked once
-			}
-		}
-
-		if (!placed)
-			rankedScore[i] = i;
-	}
-}
-
-
-
 char getChar(int board[][w_], int r, int c)
 {
 	if (board[r][c] == nDisc)
@@ -1000,22 +828,6 @@ char getChar(int board[][w_], int r, int c)
 
 	else
 		return 'X'; //something went wrong
-}
-
-
-
-void scoreReset(int score[])
-{
-	for (int i = 0; i < w_; i++)
-		score[i] = 0;
-}
-
-
-
-void rankedScoreReset(int rankedScore[])
-{
-	for (int i = 0; i < w_; i++)
-		rankedScore[i] = -1;
 }
 
 
