@@ -1,24 +1,28 @@
-﻿Build started 10/20/2015 12:28:32 AM.
-     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" on node 4 (Build target(s)).
+﻿Build started 10/27/2015 1:03:06 AM.
+     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" on node 5 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt board.cpp brain.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt board.cpp brain.cpp main.cpp
+         main.cpp
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\main.cpp(19): warning C4101: 'validMove': unreferenced local variable
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\main.cpp(21): warning C4101: 'moveChoice': unreferenced local variable
          brain.cpp
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(76): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(78): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(91): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(93): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(101): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\brain.cpp(103): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(76): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(78): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(91): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(93): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(101): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\brain.cpp(103): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
          board.cpp
          Generating Code...
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\con4_fancy\board.cpp(354): warning C4715: 'Board::getCell': not all control paths return a value
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\con4_fancy\board.cpp(354): warning C4715: 'Board::getCell': not all control paths return a value
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.lib" /MACHINE:X86 Debug\board.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_fancy.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_fancy.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_fancy.lib" /MACHINE:X86 Debug\board.obj
          Debug\brain.obj
          Debug\main.obj
-         con4_fancy.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_fancy.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" (Build target(s)).
+         LINK : C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_fancy.exe not found or not built by the last incremental link; performing full link
+         con4_fancy.vcxproj -> C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_fancy.exe
+     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_fancy\con4_fancy.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:02.55
+Time Elapsed 00:00:05.10

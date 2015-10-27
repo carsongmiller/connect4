@@ -28,7 +28,8 @@ TO DO:
 //#define _AB_MINIMAX_DEBUG
 //#define _MINIMAX_DEBUG
 //#define _STATIC_EVAL_DEBUG
-//#define _MAIN_DEBUG
+#define _MAIN_DEBUG
+#define _AB_DEBUG
 
 #define w_ 7
 #define h_ 6
@@ -41,7 +42,7 @@ using namespace std;
 
 //int MAX_DEPTH;
 
-#ifdef _DEBUG
+#ifdef _MAIN_DEBUG
 	ofstream debug;
 #endif
 
@@ -78,7 +79,7 @@ ALGORITHMS/HEURISTICS
 
 	//ultimate returns column of the best move for the computer
 	int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH);
-	int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int alpha, int beta);
+	int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int alpha, int beta, int &cutCount);
 
 	//checks if the disc at board[r][c] has won
 	bool winDetect(int board[][w_], int r, int c, int who);
@@ -128,10 +129,10 @@ PRINT FUNCTIONS
 */
 
 	//prints the board
-	void printBoard(int board[][w_], int lastR, int lastC);
+	void printBoard(int board[][w_]);
 
 	//takes care of printing most of the screen
-	void printScreen(int board[][w_], int lastR, int lastC);
+	void printScreen(int board[][w_]);
 
 	//prints a given string of text in a different color then changes the text color back to white (overloaded for string, int, and char arguments)
 	void printColor(string str, int color);
@@ -168,10 +169,7 @@ int main()
 	#ifdef _MAIN_DEBUG
 		debug.open("debug.txt");
 		if (debug.fail())
-		{
 			cout << "Failed to open stream \"debug\"";
-			exit(1);
-		}
 	#endif
 
 	int board[h_][w_]; //the main board
@@ -195,7 +193,7 @@ int main()
 		boardInit(board);
 		system("cls");
 		whosTurn = preGame();
-		printScreen(board, rowPlayed, colPlayed);
+		printScreen(board);
 
 		turn = 0;
 
@@ -210,7 +208,7 @@ int main()
 				#endif
 
 				playerTurn(board, rowPlayed, colPlayed);
-				printScreen(board, rowPlayed, colPlayed);
+				printScreen(board);
 
 				//cout << "MAX_DEPTH: " << MAX_DEPTH << endl;
 
@@ -228,7 +226,7 @@ int main()
 				#endif
 
 				compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH);
-				printScreen(board, rowPlayed, colPlayed);
+				printScreen(board);
 				cout << "The computer played in column ";
 				printColor(colPlayed+1, GREEN);
 				cout << "\n\n";
@@ -267,7 +265,7 @@ int main()
 	}
 
 	#ifdef _MAIN_DEBUG
-		debug.close();
+		//debug.close();
 	#endif
 
 	return 0;
@@ -407,8 +405,8 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	#ifdef _MINIMAX_DEBUG
 		debug << "\t\tCopying board[][] to newBoard[][]\n";
 	#endif
-	int newBoard[h_][w_]; //creating a copy of the board
-	copyBoard(board, newBoard);
+	//int newBoard[h_][w_]; //creating a copy of the board
+	//copyBoard(board, newBoard);
 	
 	int score[w_]; //creating clean score[] array
 	for (int i = 0; i < w_; i++)
@@ -422,7 +420,10 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 		#ifdef _MINIMAX_DEBUG
 			debug << "\t\tplaying move for " << minormax << " in column: " << C << "\n";
 		#endif
-		R = playMove(newBoard, C, minormax);
+
+		R = playMove(board, C, minormax);
+		//printScreen(board);
+
 		#ifdef _MINIMAX_DEBUG
 			if (R != -1)
 				debug << "\t\t\tdisc played in (r, c): (" << R << ", " << C << ")\n";
@@ -432,7 +433,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 		if (R != -1)
 		{
-			if (winDetect(newBoard, R, C, minormax)) //checks for a win for original_caller
+			if (winDetect(board, R, C, minormax)) //checks for a win for original_caller
 			{
 				if (minormax == maximizer)
 					score[C] = 1000000;
@@ -442,17 +443,18 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			}
 
 			else if (depth == MAX_DEPTH)
-				score[C] = staticEval(newBoard, maximizer);
+				score[C] = staticEval(board, maximizer);
 
 			else
 			{
 				if(minormax == cDisc)
-					score[C] = minimax(newBoard, maximizer, pDisc, depth + 1, MAX_DEPTH);
+					score[C] = minimax(board, maximizer, pDisc, depth + 1, MAX_DEPTH);
 				else
-					score[C] = minimax(newBoard, maximizer, cDisc, depth + 1, MAX_DEPTH);
+					score[C] = minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH);
 			}
 
-			unPlayMove(newBoard, C);
+			unPlayMove(board, C);
+			//printScreen(board);
 		}
 
 		else
@@ -540,7 +542,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 
 
-int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int alpha, int beta)
+int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int alpha, int beta, int &cutCount)
 {
 	#ifdef _AB_MINIMAX_DEBUG
 		debug << "\tENTERING ab_minimax()\n";
@@ -577,6 +579,13 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 				#ifdef _AB_MINIMAX_DEBUG
 					debug << "TRUE\n";
 				#endif
+				
+				#ifdef _AB_DEBUG
+					int cut = (w_ - C)*pow(7, MAX_DEPTH - depth);
+
+					debug << "Cut Branches: " << cut << "\n";
+					cutCount += cut;
+				#endif
 				return INT_MIN;
 			}
 			else
@@ -589,7 +598,9 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 		#ifdef _AB_MINIMAX_DEBUG
 				debug << "\t\tplaying move for " << minormax << " in column: " << C << "\n";
 		#endif
+
 		R = playMove(newBoard, C, minormax);
+
 		#ifdef _AB_MINIMAX_DEBUG
 				if (R != -1)
 					debug << "\t\t\tdisc played in (r, c): (" << R << ", " << C << ")\n";
@@ -619,11 +630,11 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 
 				if (minormax == cDisc)
 				{
-					score[C] = ab_minimax(newBoard, maximizer, pDisc, depth + 1, MAX_DEPTH, alpha, beta);
+					score[C] = ab_minimax(newBoard, maximizer, pDisc, depth + 1, MAX_DEPTH, alpha, beta, cutCount);
 				}
 				else
 				{
-					score[C] = ab_minimax(newBoard, maximizer, cDisc, depth + 1, MAX_DEPTH, alpha, beta);
+					score[C] = ab_minimax(newBoard, maximizer, cDisc, depth + 1, MAX_DEPTH, alpha, beta, cutCount);
 				}
 			}
 
@@ -862,30 +873,31 @@ bool vTrapDetect(int board[][w_], int who)
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed1 = playMove(board, i, who); //play first move
-		prev = setCell(board, rowPlayed1 - 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
+		prev = setCell(board, rowPlayed1 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
 
 		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
 		{
-			setCell(board, rowPlayed1 - 1, i, prev); //replacing "cleared cell 1"
+			setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
 			rowPlayed2 = playMove(board, i, who); //play second move
-			prev = setCell(board, rowPlayed2 - 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
+			prev = setCell(board, rowPlayed2 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
 
 			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
 			{
-				setCell(board, rowPlayed2 - 1, i, prev); //replacing "cleared cell 2"
+				setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
 				unPlayMove(board, i);
 				unPlayMove(board, i);
 				trapCount++;
 			}
 
-			setCell(board, rowPlayed2 - 1, i, prev); //replacing "cleared cell 2"
+			setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
 			if (rowPlayed2 != -1)
 				unPlayMove(board, i);
 		}
 
-		setCell(board, rowPlayed1 - 1, i, prev); //replacing "cleared cell 1"
+		setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
 		if (rowPlayed1 != -1)
 			unPlayMove(board, i);
+		
 	}
 
 	return trapCount;
@@ -1006,8 +1018,14 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		}
 	}
 
+	int cutCount = 0;
+
 	colPlayed = minimax(board, cDisc, cDisc, 1, MAX_DEPTH);
-	//colPlayed = ab_minimax(board, cDisc, cDisc, 0, -1000001, 1000001); //starting alpha and beta out arbitrarily large
+	//colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, -1000001, 1000001, cutCount); //starting alpha and beta out arbitrarily large
+
+	#ifdef _AB_DEBUG
+		debug << "Total Cut Count: " << cutCount << "\n";
+	#endif
 	
 
 	rowPlayed = playMove(board, colPlayed, cDisc);
@@ -1119,12 +1137,12 @@ PRINT FUNCTIONS
 
 
 
-void printScreen(int board[][w_], int lastR, int lastC)
+void printScreen(int board[][w_])
 {
 	system("cls");
 	cout << "CONNECT 4!\n";
 	printPlayerColors();
-	printBoard(board, lastR, lastC);
+	printBoard(board);
 	//cout << "MAX_DEPTH: " << MAX_DEPTH;
 	cout << "\n";
 }
@@ -1132,7 +1150,7 @@ void printScreen(int board[][w_], int lastR, int lastC)
 
 
 //Following code is pretty messy, but it works and makes a nice print out
-void printBoard(int board[][w_], int lastR, int lastC)
+void printBoard(int board[][w_])
 {
 	for (int i = 1; i <= w_; i++)
 	{
@@ -1169,9 +1187,9 @@ void printBoard(int board[][w_], int lastR, int lastC)
 			if (board[r][c] == nDisc)
 				cout << getChar(board, r, c);
 			else if (board[r][c] == pDisc)
-				printColor(getChar(board, r, c), FOREGROUND_RED);
+				printColor(getChar(board, r, c), LIGHTRED);
 			else if (board[r][c] == cDisc)
-				printColor(getChar(board, r, c), FOREGROUND_BLUE);
+				printColor(getChar(board, r, c), LIGHTBLUE);
 
 			cout << "   |   ";
 		}
@@ -1197,10 +1215,10 @@ void printBoard(int board[][w_], int lastR, int lastC)
 void printPlayerColors()
 {
 	cout << "Player: ";
-	printColor('O', RED);
+	printColor('O', LIGHTRED);
 	cout << endl;
 	cout << "Computer: ";
-	printColor('O', BLUE);
+	printColor('O', LIGHTBLUE);
 	cout << endl;
 }
 
