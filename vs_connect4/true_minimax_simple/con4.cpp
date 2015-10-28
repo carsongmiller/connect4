@@ -377,6 +377,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	{
 
 		R = playMove(board, C, minormax);
+		printScreen(board);
 
 			#ifdef _BOARD_DEBUG
 				printScreen(board);
@@ -405,6 +406,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			}
 
 			unPlayMove(board, C);
+			printScreen(board);
 				
 				#ifdef _BOARD_DEBUG
 					printScreen(board);
@@ -416,6 +418,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	}
 
 	int low, high;
+	printScreen(board);
 
 	for (int i = 0; i < w_; i++) //initializing low and high to a valid cell
 	{
