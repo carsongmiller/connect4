@@ -75,7 +75,7 @@ ALGORITHMS/HEURISTICS
 */
 
 	//does a static evaluation of the board
-	int staticEval(int board[][w_]);
+	int staticEval(int board[][w_], int maximizer);
 
 	//ultimate returns column of the best move for the computer
 	int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH);
@@ -183,7 +183,7 @@ int main()
 	int colPlayed = 0; //stores the column in which the last disc was played
 	int whosTurn; //keeps track of who's turn it is (1 = player1/human, 2 = player2/computer)
 	int turn; //keeps track of how mant discs have been played
-	int MAX_DEPTH = 3;
+	int MAX_DEPTH = 6;
 	int winner = 0;
 
 	while (newGame)
@@ -287,7 +287,7 @@ int staticEval(int board[][w_], int maximizer)
 	//printScreen(board);
 	maxVTrapCount = vTrapDetect(board, maximizer);
 	//printScreen(board);
-	minVTrapCount = 0; // vTrapDetect(board, minimizer);
+	minVTrapCount = vTrapDetect(board, minimizer);
 	//printScreen(board);
 
 #ifdef _STATIC_EVAL_DEBUG
@@ -313,6 +313,7 @@ int staticEval(int board[][w_], int maximizer)
 
 	if (hTrapDetect(board, maximizer))
 	{
+		//printScreen(board);
 		#ifdef _STATIC_EVAL_DEBUG
 			debug << "TRUE\n";
 		#endif
@@ -320,6 +321,7 @@ int staticEval(int board[][w_], int maximizer)
 	}
 	else
 	{
+		//printScreen(board);
 		#ifdef _STATIC_EVAL_DEBUG
 				debug << "FALSE\n";
 		#endif
@@ -331,6 +333,7 @@ int staticEval(int board[][w_], int maximizer)
 
 	if (hTrapDetect(board, minimizer))
 	{
+		//printScreen(board);
 		#ifdef _STATIC_EVAL_DEBUG
 				debug << "\t\tTRUE\n";
 		#endif
@@ -338,6 +341,7 @@ int staticEval(int board[][w_], int maximizer)
 	}
 	else
 	{
+		//printScreen(board);
 		#ifdef _STATIC_EVAL_DEBUG
 			debug << "FALSE\n";
 		#endif
@@ -348,6 +352,7 @@ int staticEval(int board[][w_], int maximizer)
 		debug << "\t\tscore: " << score << "\n";
 		debug << "\texiting staticEval()\n\n";
 	#endif
+		//printScreen(board);
 	return score;
 }
 
@@ -377,7 +382,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	{
 
 		R = playMove(board, C, minormax);
-		printScreen(board);
+		//printScreen(board);
 
 			#ifdef _BOARD_DEBUG
 				printScreen(board);
@@ -387,6 +392,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 		{
 			if (winDetect(board, R, C, minormax)) //checks for a win for original_caller
 			{
+
 				if (minormax == maximizer)
 					score[C] = 1000000;
 
@@ -406,7 +412,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			}
 
 			unPlayMove(board, C);
-			printScreen(board);
+			//printScreen(board);
 				
 				#ifdef _BOARD_DEBUG
 					printScreen(board);
@@ -418,7 +424,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	}
 
 	int low, high;
-	printScreen(board);
+	//printScreen(board);
 
 	for (int i = 0; i < w_; i++) //initializing low and high to a valid cell
 	{
@@ -730,7 +736,7 @@ int nearWinDetect(int board[][w_], int who)
 
 bool vTrapDetect(int board[][w_], int who)
 {
-	int rowPlayed1, rowPlayed2, prev, trapCount = 0, notWho;
+	int rowPlayed1, rowPlayed2, prev1, prev2, trapCount = 0, notWho;
 
 	if (who == cDisc) notWho = pDisc;
 	else notWho = cDisc;
@@ -738,31 +744,34 @@ bool vTrapDetect(int board[][w_], int who)
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed1 = playMove(board, i, who); //play first move
-		prev = setCell(board, rowPlayed1 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
+		prev1 = setCell(board, rowPlayed1 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
 
 		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
 		{
-			setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
+			setCell(board, rowPlayed1 + 1, i, prev1); //replacing "cleared cell 1"
 			rowPlayed2 = playMove(board, i, who); //play second move
-			prev = setCell(board, rowPlayed2 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
+			prev2 = setCell(board, rowPlayed2 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
 
 			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
 			{
-				setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
-				unPlayMove(board, i);
-				unPlayMove(board, i);
+				setCell(board, rowPlayed2 + 1, i, prev2); //replacing "cleared cell 2"
 				trapCount++;
 			}
 
-			setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
+			setCell(board, rowPlayed2 + 1, i, prev2); //replacing "cleared cell 2"
 			if (rowPlayed2 != -1)
+			{
 				unPlayMove(board, i);
+			}
 		}
 
-		setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
+		setCell(board, rowPlayed1 + 1, i, prev1); //replacing "cleared cell 1"
+
 		if (rowPlayed1 != -1)
+		{
 			unPlayMove(board, i);
-		
+		}
+
 	}
 
 	return trapCount;
@@ -895,6 +904,8 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 	rowPlayed = playMove(board, colPlayed, cDisc);
 }
+
+
 
 
 

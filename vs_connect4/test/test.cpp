@@ -75,7 +75,7 @@ ALGORITHMS/HEURISTICS
 */
 
 //does a static evaluation of the board
-int staticEval(int board[][w_]);
+int staticEval(int board[][w_], int maximizer);
 
 //ultimate returns column of the best move for the computer
 int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH);
@@ -132,7 +132,7 @@ PRINT FUNCTIONS
 void printBoard(int board[][w_]);
 void printBoard(int board[][w_], ofstream &output); //overloaded for debuging
 
-													//takes care of printing most of the screen
+//takes care of printing most of the screen
 void printScreen(int board[][w_]);
 
 //prints a given string of text in a different color then changes the text color back to white (overloaded for string, int, and char arguments)
@@ -143,7 +143,7 @@ void printColor(int i, int color, ofstream &output); //overloaded for debuging
 void printColor(char c, int color);
 void printColor(char c, int color, ofstream &output); //overloaded for debuging
 
-													  //prints out which player is which color
+//prints out which player is which color
 void printPlayerColors();
 
 /*
@@ -188,22 +188,61 @@ int main()
 
 	int board[h_][w_] =
 	{
-	{0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 2, 1, 0, 0},
-	{0, 0, 2, 1, 1, 1, 2} };
-
-	int vTrapCount;
-	bool hTrap;
-	
-	printScreen(board);
-
-	compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH);
+		{ 0, 1, 0, 0, 0, 0, 0 },
+		{ 0, 2, 0, 0, 0, 0, 0 },
+		{ 0, 1, 0, 0, 2, 0, 0 },
+		{ 0, 2, 0, 1, 1, 0, 0 },
+		{ 0, 2, 1, 2, 1, 0, 0 },
+		{ 2, 2, 2, 1, 1, 1, 2 } };
 
 	printScreen(board);
-				
+
+	turn = 18;
+	whosTurn = 1;
+
+	while (turn < w_*h_)
+	{
+		if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
+
+		if (whosTurn == 1) //player's turn
+		{
+
+			playerTurn(board, rowPlayed, colPlayed);
+			printScreen(board);
+
+			//cout << "MAX_DEPTH: " << MAX_DEPTH << endl;
+
+			if (winDetect(board, rowPlayed, colPlayed, pDisc))
+			{
+				winner = 1;
+				break;
+			}
+		}
+
+		else if (whosTurn == 2) //computer's turn
+		{
+			compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH);
+			printScreen(board);
+			cout << "The computer played in column ";
+			printColor(colPlayed + 1, GREEN);
+			cout << "\n\n";
+
+			//cout << "MAX_DEPTH: " << MAX_DEPTH << endl;
+
+			if (winDetect(board, rowPlayed, colPlayed, cDisc))
+			{
+				winner = 2;
+				break;
+			}
+			Sleep(1000);
+		}
+
+		if (whosTurn == 1) whosTurn = 2;
+		else whosTurn = 1;
+
+		turn++;
+	}
+
 	return 0;
 }
 
@@ -237,8 +276,8 @@ int staticEval(int board[][w_], int maximizer)
 	//printScreen(board);
 	maxVTrapCount = vTrapDetect(board, maximizer);
 	//printScreen(board);
-	minVTrapCount = 0; // vTrapDetect(board, minimizer);
-					   //printScreen(board);
+	minVTrapCount = vTrapDetect(board, minimizer);
+	//printScreen(board);
 
 #ifdef _STATIC_EVAL_DEBUG
 	printBoard(board, debug);
@@ -263,6 +302,7 @@ int staticEval(int board[][w_], int maximizer)
 
 	if (hTrapDetect(board, maximizer))
 	{
+		//printScreen(board);
 #ifdef _STATIC_EVAL_DEBUG
 		debug << "TRUE\n";
 #endif
@@ -270,6 +310,7 @@ int staticEval(int board[][w_], int maximizer)
 	}
 	else
 	{
+		//printScreen(board);
 #ifdef _STATIC_EVAL_DEBUG
 		debug << "FALSE\n";
 #endif
@@ -281,6 +322,7 @@ int staticEval(int board[][w_], int maximizer)
 
 	if (hTrapDetect(board, minimizer))
 	{
+		//printScreen(board);
 #ifdef _STATIC_EVAL_DEBUG
 		debug << "\t\tTRUE\n";
 #endif
@@ -288,6 +330,7 @@ int staticEval(int board[][w_], int maximizer)
 	}
 	else
 	{
+		//printScreen(board);
 #ifdef _STATIC_EVAL_DEBUG
 		debug << "FALSE\n";
 #endif
@@ -298,6 +341,7 @@ int staticEval(int board[][w_], int maximizer)
 	debug << "\t\tscore: " << score << "\n";
 	debug << "\texiting staticEval()\n\n";
 #endif
+	//printScreen(board);
 	return score;
 }
 
@@ -327,6 +371,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	{
 
 		R = playMove(board, C, minormax);
+		//printScreen(board);
 
 #ifdef _BOARD_DEBUG
 		printScreen(board);
@@ -336,6 +381,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 		{
 			if (winDetect(board, R, C, minormax)) //checks for a win for original_caller
 			{
+
 				if (minormax == maximizer)
 					score[C] = 1000000;
 
@@ -344,7 +390,10 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			}
 
 			else if (depth == MAX_DEPTH)
+			{
 				score[C] = staticEval(board, maximizer);
+				//printScreen(board);
+			}
 
 			else
 			{
@@ -354,7 +403,9 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 					score[C] = minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH);
 			}
 
+			//printScreen(board);
 			unPlayMove(board, C);
+			//printScreen(board);
 
 #ifdef _BOARD_DEBUG
 			printScreen(board);
@@ -366,6 +417,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 	}
 
 	int low, high;
+	//printScreen(board);
 
 	for (int i = 0; i < w_; i++) //initializing low and high to a valid cell
 	{
@@ -677,7 +729,7 @@ int nearWinDetect(int board[][w_], int who)
 
 bool vTrapDetect(int board[][w_], int who)
 {
-	int rowPlayed1, rowPlayed2, prev, trapCount = 0, notWho;
+	int rowPlayed1, rowPlayed2, prev1, prev2, trapCount = 0, notWho;
 
 	if (who == cDisc) notWho = pDisc;
 	else notWho = cDisc;
@@ -685,30 +737,46 @@ bool vTrapDetect(int board[][w_], int who)
 	for (int i = 0; i < w_; i++)
 	{
 		rowPlayed1 = playMove(board, i, who); //play first move
-		prev = setCell(board, rowPlayed1 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
+		//printScreen(board);
+		prev1 = setCell(board, rowPlayed1 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 1")
+		//printScreen(board);
 
 		if (rowPlayed1 != -1 && winDetect(board, rowPlayed1, i, who))
 		{
-			setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
+			//printScreen(board);
+			setCell(board, rowPlayed1 + 1, i, prev1); //replacing "cleared cell 1"
+			//printScreen(board);
 			rowPlayed2 = playMove(board, i, who); //play second move
-			prev = setCell(board, rowPlayed2 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
+			//printScreen(board);
+			prev2 = setCell(board, rowPlayed2 + 1, i, nDisc); //avoids vertical win detection ("cleared cell 2")
+			//printScreen(board);
 
 			if (rowPlayed2 != -1 && winDetect(board, rowPlayed2, i, who))
 			{
-				setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
-				unPlayMove(board, i);
-				unPlayMove(board, i);
+				//printScreen(board);
+				setCell(board, rowPlayed2 + 1, i, prev2); //replacing "cleared cell 2"
+				//printScreen(board);
 				trapCount++;
 			}
 
-			setCell(board, rowPlayed2 + 1, i, prev); //replacing "cleared cell 2"
+			setCell(board, rowPlayed2 + 1, i, prev2); //replacing "cleared cell 2"
+			//printScreen(board);
+
 			if (rowPlayed2 != -1)
+			{
 				unPlayMove(board, i);
+				//printScreen(board);
+			}
 		}
 
-		setCell(board, rowPlayed1 + 1, i, prev); //replacing "cleared cell 1"
+		setCell(board, rowPlayed1 + 1, i, prev1); //replacing "cleared cell 1"
+		//printScreen(board);
+
 		if (rowPlayed1 != -1)
+		{
 			unPlayMove(board, i);
+			//printScreen(board);
+		}
 
 	}
 
@@ -808,24 +876,29 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 	{
 		colPlayed = w_ / 2;
 		rowPlayed = playMove(board, colPlayed, cDisc);
+		printScreen(board);
 		return;
 	}
 
 	int nearWin = nearWinDetect(board, cDisc);
+	printScreen(board);
 	if (nearWin != -1)
 	{
 		colPlayed = nearWin;
 		rowPlayed = playMove(board, colPlayed, cDisc);
+		printScreen(board);
 		return;
 	}
 
 	else
 	{
 		nearWin = nearWinDetect(board, pDisc);
+		printScreen(board);
 		if (nearWin != -1)
 		{
 			colPlayed = nearWin;
 			rowPlayed = playMove(board, colPlayed, cDisc);
+			printScreen(board);
 			return;
 		}
 	}
@@ -833,6 +906,7 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 	int cutCount = 0;
 
 	colPlayed = minimax(board, cDisc, cDisc, 1, MAX_DEPTH);
+	printScreen(board);
 	//colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, -1000001, 1000001, cutCount); //starting alpha and beta out arbitrarily large
 
 #ifdef _AB_DEBUG
@@ -841,7 +915,10 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 
 	rowPlayed = playMove(board, colPlayed, cDisc);
+	printScreen(board);
 }
+
+
 
 
 
