@@ -7,9 +7,7 @@
 
 TO DO:
 
--Add alpha beta pruning
--Program crashed when there was only one available column
-	-exact cause of the crash unknown
+-make sure alpha beta pruning is working correctly
 
 */
 
@@ -24,6 +22,7 @@ TO DO:
 #include <cmath>
 #include <limits>
 #include <ctime>
+#include <algorithm>
 
 //#define _DEBUG
 
@@ -97,6 +96,9 @@ ALGORITHMS/HEURISTICS
 	//checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
 	bool hTrapDetect(int board[][w_], int who);
 
+	//counts the # of places on the board (even if they're not available yet) where one disc could complete a string of 4
+	int oneToWinCount(int board[][w_], int who);
+
 /*
 ---------------------------
 BOARD MANIPULATION
@@ -108,9 +110,6 @@ BOARD MANIPULATION
 
 	//deletes the top disc in the given column
 	bool unPlayMove(int board[][w_], int col);
-
-	//copies the board
-	void copyBoard(int board[][w_], int newBoard[][w_]);
 
 	//initializes the board
 	void boardInit(int board[][w_]);
@@ -162,9 +161,6 @@ OTHER HELPER FUNCTIONS
 	//picks who goes first
 	int preGame();
 
-	//ignores any key presses that may have occured during computer's turn
-	void ignoreInput();
-
 
 
 int main()
@@ -199,6 +195,7 @@ int main()
 
 		while (turn < w_*h_)
 		{
+			//if (turn < 7) MAX_DEPTH = 6;
 			if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
 
 			if (whosTurn == 1) //player's turn
@@ -280,11 +277,17 @@ int staticEval(int board[][w_], int maximizer, int turn)
 	else minimizer = cDisc;
 
 	int score = 0;
-	int maxNearWinCount = 0, minNearWinCount = 0, maxVTrapCount = 0, minVTrapCount = 0;
+	//int maxNearWinCount = 0, minNearWinCount = 0;
+	int maxVTrapCount = 0, minVTrapCount = 0;
+	int maxOneToWinCount = 0, minOneToWinCount = 0;
 
-	maxNearWinCount = nearWinCount(board, maximizer);
+	//maxNearWinCount = nearWinCount(board, maximizer);
 	//printScreen(board);
-	minNearWinCount = nearWinCount(board, minimizer);
+	//minNearWinCount = nearWinCount(board, minimizer);
+	//printScreen(board);
+	maxOneToWinCount = oneToWinCount(board, maximizer);
+	//printScreen(board);
+	minOneToWinCount = oneToWinCount(board, minimizer);
 	//printScreen(board);
 
 	if (turn >= 10)
@@ -297,59 +300,36 @@ int staticEval(int board[][w_], int maximizer, int turn)
 
 	#ifdef _STATIC_EVAL_DEBUG
 		//printBoard(board, debug);
-		debug << "maxNearWinCount: " << maxNearWinCount << "\n";
-		debug << "minNearWinCount: " << minNearWinCount << "\n";
+		//debug << "maxNearWinCount: " << maxNearWinCount << "\n";
+		//debug << "minNearWinCount: " << minNearWinCount << "\n";
 		debug << "maxVTrapCount: " << maxVTrapCount << "\n";
 		debug << "minVTrapCount: " << minVTrapCount << "\n";
+		debug << "maxOneToWinCount: " << maxOneToWinCount << "\n";
+		debug << "maxOneToWinCount: " << minOneToWinCount << "\n";
 	#endif
 
 
-	score += 5 * maxNearWinCount;
-	score -= 5 * minNearWinCount;
+	//score += 5 * maxNearWinCount;
+	//score -= 5 * minNearWinCount;
 
-	score += 10 * maxVTrapCount;
-	score -= 10 * minVTrapCount;
+	score += 50 * maxVTrapCount;
+	score -= 50 * minVTrapCount;
+
+	score += 10 * maxOneToWinCount;
+	score -= 10 * minOneToWinCount;
 
 
 	//Check horizontal wins
-			#ifdef _STATIC_EVAL_DEBUG
-					debug << "\t\tmaximizer hTrap: ";
-			#endif
-
 		if (hTrapDetect(board, maximizer))
 		{
 			//printScreen(board);
-			#ifdef _STATIC_EVAL_DEBUG
-						debug << "TRUE\n";
-			#endif
 			score += 5000000;
 		}
-		else
-		{
-			//printScreen(board);
-			#ifdef _STATIC_EVAL_DEBUG
-						debug << "FALSE\n";
-			#endif
-		}
-
-			#ifdef _STATIC_EVAL_DEBUG
-					debug << "\t\tminimizer hTrap: ";
-			#endif
 
 		if (hTrapDetect(board, minimizer))
 		{
 			//printScreen(board);
-			#ifdef _STATIC_EVAL_DEBUG
-						debug << "\t\tTRUE\n";
-			#endif
 			score -= 2;
-		}
-		else
-		{
-			//printScreen(board);
-			#ifdef _STATIC_EVAL_DEBUG
-				debug << "FALSE\n";
-			#endif
 		}
 
 
@@ -360,10 +340,6 @@ int staticEval(int board[][w_], int maximizer, int turn)
 		//printScreen(board);
 	return score;
 }
-
-
-
-
 
 
 
@@ -399,10 +375,10 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			{
 
 				if (minormax == maximizer)
-					score[C] = 1000000;
+					score[C] = 1000;
 
 				else
-					score[C] = -1000000;
+					score[C] = -1000;
 			}
 
 			else if (depth == MAX_DEPTH)
@@ -450,10 +426,6 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 				high = i;
 			else if (score[i] < score[low])
 				low = i;
-			else if (score[i] == score[low] && rand() % 2 == 0) //if two columns have the same score, randomize
-				low = i;
-			else if (score[i] == score[high] && rand() % 2 == 0) //if two columns have the same score, randomize
-				high = 1;
 		}
 	}
 
@@ -484,17 +456,10 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 
 
-
-
-
-
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount)
 {
 	//"original_caller" keeps track of which player originally called minimax()
 	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = min, 2 = max)
-
-	int newBoard[h_][w_]; //creating a copy of the board
-	copyBoard(board, newBoard);
 
 	int score[w_]; //creating clean score[] array
 	for (int i = 0; i < w_; i++)
@@ -511,22 +476,22 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 				break;
 			}
 
-		R = playMove(newBoard, C, minormax);
+		R = playMove(board, C, minormax);
 
 		if (R != -1)
 		{
-			if (turn >= 8 && winDetect(newBoard, R, C, minormax)) //checks for a win for original_caller
+			if (turn >= 8 && winDetect(board, R, C, minormax)) //checks for a win for original_caller
 			{
 				if (minormax == maximizer)
-					score[C] = 1000000;
+					score[C] = 1000;
 
 				else
-					score[C] = -1000000;
+					score[C] = -1000;
 			}
 
 			else if (depth == MAX_DEPTH)
 			{
-				score[C] = staticEval(newBoard, maximizer, turn);
+				score[C] = staticEval(board, maximizer, turn);
 
 				#ifdef _AB_DEBUG
 					debug << "Called staticEval()\n";
@@ -537,30 +502,30 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			{
 				if (minormax == cDisc)
 				{
-					score[C] = ab_minimax(newBoard, maximizer, pDisc, depth + 1, MAX_DEPTH, turn, alpha, beta, cutCount);
+					score[C] = ab_minimax(board, maximizer, pDisc, depth + 1, MAX_DEPTH, turn, alpha, beta, cutCount);
 				}
 				else
 				{
-					score[C] = ab_minimax(newBoard, maximizer, cDisc, depth + 1, MAX_DEPTH, turn, alpha, beta, cutCount);
+					score[C] = ab_minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH, turn, alpha, beta, cutCount);
 				}
 			}
 
 			//Checking to reassign alpha and beta
-				if (minormax == cDisc && score[C] > alpha)
+				if (score[C] != INT_MIN)
 				{
-					alpha = score[C]; //reassigning alpha
+					if (minormax == cDisc && score[C] > alpha)
+					{
+						alpha = score[C]; //reassigning alpha
+					}
+
+					else if (minormax == pDisc && score[C] < beta)
+					{
+						beta = score[C]; //reassigning beta
+					}
 				}
 
-				else if (minormax == pDisc && score[C] < beta)
-				{
-					beta = score[C]; //reassigning beta
-				}
-
-			unPlayMove(newBoard, C);
+			unPlayMove(board, C);
 		}
-
-		//else
-			//score[C] = INT_MIN; //INT_MIN will be the value for an invalid cell
 	}
 
 
@@ -624,10 +589,6 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			}
 		}
 }
-
-
-
-
 
 
 
@@ -722,8 +683,6 @@ int nearWinCount(int board[][w_], int who)
 
 
 
-
-
 int nearWinDetect(int board[][w_], int who)
 {
 	int rowPlayed;
@@ -741,17 +700,12 @@ int nearWinDetect(int board[][w_], int who)
 				return i;
 			}
 
-			else
-			{
-				unPlayMove(board, i);
-			}
+			else unPlayMove(board, i);
 		}
 	}
 
 	return -1;
 }
-
-
 
 
 
@@ -800,8 +754,6 @@ int vTrapDetect(int board[][w_], int who)
 
 
 
-
-
 bool hTrapDetect(int board[][w_], int who)
 {
 	int count;
@@ -833,6 +785,30 @@ bool hTrapDetect(int board[][w_], int who)
 	if (count < 5) return false;
 	else return true;
 }
+
+
+
+int oneToWinCount(int board[][w_], int who)
+{
+	int count = 0;
+
+	for (int c = 0; c < w_; c++)
+	{
+		for (int r = 0; r < h_; r++)
+		{
+			if (board[r][c] == nDisc)
+			{
+				setCell(board, r, c, who);
+				if (winDetect(board, r, c, who))
+					count++;
+				setCell(board, r, c, nDisc);
+			}
+			else break;
+		}
+	}
+	return count;
+}
+
 
 
 
@@ -919,7 +895,7 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 	}
 
 	if(use_AB)
-		colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn, -1000001, 1000001, cutCount); //starting alpha and beta out arbitrarily large
+		colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX, cutCount); //starting alpha and beta out arbitrarily large
 	else
 		colPlayed = minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn);
 	
@@ -931,8 +907,6 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 	rowPlayed = playMove(board, colPlayed, cDisc);
 }
-
-
 
 
 
@@ -985,19 +959,6 @@ void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 
 		else
 			break;
-	}
-}
-
-
-
-void copyBoard(int board[][w_], int newBoard[][w_])
-{
-	for (int r = 0; r < h_; r++)
-	{
-		for (int c = 0; c < w_; c++)
-		{
-			newBoard[r][c] = board[r][c];
-		}
 	}
 }
 
@@ -1292,10 +1253,4 @@ int preGame()
 			cin >> first;
 		}
 	}
-}
-
-
-void ignoreInput()
-{
-	
 }

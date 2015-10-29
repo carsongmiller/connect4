@@ -1,10 +1,10 @@
-﻿Build started 10/28/2015 11:28:11 PM.
-     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_simple\Project1.vcxproj" on node 2 (Build target(s)).
+﻿Build started 10/29/2015 1:25:19 PM.
+     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_simple\Project1.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (con4.vcxproj, Project1.vcxproj, vs_connect4_simple.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>Link:
-         Project1.vcxproj -> C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\con4_simple.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\con4_simple\Project1.vcxproj" (Build target(s)).
+         Project1.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\con4_simple.exe
+     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\con4_simple\Project1.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:00.32
+Time Elapsed 00:00:00.19
