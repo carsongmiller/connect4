@@ -75,11 +75,11 @@ ALGORITHMS/HEURISTICS
 */
 
 	//does a static evaluation of the board
-	int staticEval(int board[][w_], int maximizer);
+	int staticEval(int board[][w_], int maximizer, int turn);
 
 	//ultimate returns column of the best move for the computer
-	int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH);
-	int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int alpha, int beta, int &cutCount);
+	int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn);
+	int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount);
 
 	//checks if the disc at board[r][c] has won
 	bool winDetect(int board[][w_], int r, int c, int who);
@@ -269,7 +269,7 @@ ALGORITHMS/HEURISTICS
 
 
 
-int staticEval(int board[][w_], int maximizer)
+int staticEval(int board[][w_], int maximizer, int turn)
 {
 	//Checking for win detection will be taken care of in minimax()
 	//A board will only be sent here if there is no win found in the board
@@ -279,24 +279,28 @@ int staticEval(int board[][w_], int maximizer)
 	else minimizer = cDisc;
 
 	int score = 0;
-	int maxNearWinCount, minNearWinCount, maxVTrapCount, minVTrapCount;
+	int maxNearWinCount = 0, minNearWinCount = 0, maxVTrapCount = 0, minVTrapCount = 0;
 
 	maxNearWinCount = nearWinCount(board, maximizer);
 	//printScreen(board);
 	minNearWinCount = nearWinCount(board, minimizer);
 	//printScreen(board);
-	maxVTrapCount = vTrapDetect(board, maximizer);
-	//printScreen(board);
-	minVTrapCount = vTrapDetect(board, minimizer);
-	//printScreen(board);
 
-#ifdef _STATIC_EVAL_DEBUG
-	printBoard(board, debug);
-	debug << "maxNearWinCount: " << maxNearWinCount << "\n";
-	debug << "minNearWinCount: " << minNearWinCount << "\n";
-	debug << "maxVTrapCount: " << maxVTrapCount << "\n";
-	debug << "minVTrapCount: " << minVTrapCount << "\n";
-#endif
+	if (turn >= 10);
+	{
+		maxVTrapCount = vTrapDetect(board, maximizer);
+		//printScreen(board);
+		minVTrapCount = vTrapDetect(board, minimizer);
+		//printScreen(board);
+	}
+
+	#ifdef _STATIC_EVAL_DEBUG
+		printBoard(board, debug);
+		debug << "maxNearWinCount: " << maxNearWinCount << "\n";
+		debug << "minNearWinCount: " << minNearWinCount << "\n";
+		debug << "maxVTrapCount: " << maxVTrapCount << "\n";
+		debug << "minVTrapCount: " << minVTrapCount << "\n";
+	#endif
 
 
 	score += 5 * maxNearWinCount;
@@ -306,45 +310,48 @@ int staticEval(int board[][w_], int maximizer)
 	score -= 10 * minVTrapCount;
 
 
-//Check horizontal wins
-#ifdef _STATIC_EVAL_DEBUG
-	debug << "\t\tmaximizer hTrap: ";
-#endif
+	//Check horizontal wins
+	if (turn <= 10)
+	{
+			#ifdef _STATIC_EVAL_DEBUG
+					debug << "\t\tmaximizer hTrap: ";
+			#endif
 
-	if (hTrapDetect(board, maximizer))
-	{
-		//printScreen(board);
-		#ifdef _STATIC_EVAL_DEBUG
-			debug << "TRUE\n";
-		#endif
-		score += 2;
-	}
-	else
-	{
-		//printScreen(board);
-		#ifdef _STATIC_EVAL_DEBUG
-				debug << "FALSE\n";
-		#endif
-	}
+		if (hTrapDetect(board, maximizer))
+		{
+			//printScreen(board);
+			#ifdef _STATIC_EVAL_DEBUG
+						debug << "TRUE\n";
+			#endif
+			score += 2;
+		}
+		else
+		{
+			//printScreen(board);
+			#ifdef _STATIC_EVAL_DEBUG
+						debug << "FALSE\n";
+			#endif
+		}
 
-	#ifdef _STATIC_EVAL_DEBUG
-		debug << "\t\tminimizer hTrap: ";
-	#endif
+			#ifdef _STATIC_EVAL_DEBUG
+					debug << "\t\tminimizer hTrap: ";
+			#endif
 
-	if (hTrapDetect(board, minimizer))
-	{
-		//printScreen(board);
-		#ifdef _STATIC_EVAL_DEBUG
-				debug << "\t\tTRUE\n";
-		#endif
-		score -= 2;
-	}
-	else
-	{
-		//printScreen(board);
-		#ifdef _STATIC_EVAL_DEBUG
-			debug << "FALSE\n";
-		#endif
+		if (hTrapDetect(board, minimizer))
+		{
+			//printScreen(board);
+			#ifdef _STATIC_EVAL_DEBUG
+						debug << "\t\tTRUE\n";
+			#endif
+			score -= 2;
+		}
+		else
+		{
+			//printScreen(board);
+			#ifdef _STATIC_EVAL_DEBUG
+						debug << "FALSE\n";
+			#endif
+		}
 	}
 
 
@@ -362,7 +369,7 @@ int staticEval(int board[][w_], int maximizer)
 
 
 
-int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH)
+int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn)
 {
 
 	//"original_caller" keeps track of which player originally called minimax()
@@ -390,7 +397,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 		if (R != -1)
 		{
-			if (winDetect(board, R, C, minormax)) //checks for a win for original_caller
+			if (turn >= 8 && winDetect(board, R, C, minormax)) //checks for a win for original_caller
 			{
 
 				if (minormax == maximizer)
@@ -401,14 +408,14 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 			}
 
 			else if (depth == MAX_DEPTH)
-				score[C] = staticEval(board, maximizer);
+				score[C] = staticEval(board, maximizer, turn);
 
 			else
 			{
 				if(minormax == cDisc)
-					score[C] = minimax(board, maximizer, pDisc, depth + 1, MAX_DEPTH);
+					score[C] = minimax(board, maximizer, pDisc, depth + 1, MAX_DEPTH, turn + 1);
 				else
-					score[C] = minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH);
+					score[C] = minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH, turn + 1);
 			}
 
 			unPlayMove(board, C);
@@ -416,7 +423,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 				
 				#ifdef _BOARD_DEBUG
 					printScreen(board);
-				#endif		
+				#endif
 		}
 
 		else
