@@ -136,7 +136,7 @@ PRINT FUNCTIONS
 void printBoard(int board[][w_]);
 void printBoard(int board[][w_], ofstream &output); //overloaded for debuging
 
-													//takes care of printing most of the screen
+//takes care of printing most of the screen
 void printScreen(int board[][w_]);
 
 //prints a given string of text in a different color then changes the text color back to white (overloaded for string, int, and char arguments)
@@ -147,7 +147,7 @@ void printColor(int i, int color, ofstream &output); //overloaded for debuging
 void printColor(char c, int color);
 void printColor(char c, int color, ofstream &output); //overloaded for debuging
 
-													  //prints out which player is which color
+//prints out which player is which color
 void printPlayerColors();
 
 /*
@@ -203,6 +203,11 @@ int main()
 
 	turn = 6;
 	whosTurn = 2;
+
+	cout << "INT_MIN: " << INT_MIN << endl;
+	cout << "INT_MAX: " << INT_MAX << endl;
+
+	return 0;
 
 	while (newGame)
 	{

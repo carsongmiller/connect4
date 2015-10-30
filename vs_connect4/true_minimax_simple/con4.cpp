@@ -22,7 +22,6 @@ TO DO:
 #include <cmath>
 #include <limits>
 #include <ctime>
-#include <algorithm>
 
 //#define _DEBUG
 
@@ -120,6 +119,7 @@ BOARD MANIPULATION
 	//player choosing his move and making move
 	void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed);
 
+	//computer choosing and playing move
 	void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MAX_DEPTH, int &cutCount);
 
 /*
@@ -458,7 +458,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount)
 {
-	//"original_caller" keeps track of which player originally called minimax()
+	//"maximizer" keeps track of which player originally called minimax()
 	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = min, 2 = max)
 
 	int score[w_]; //creating clean score[] array
