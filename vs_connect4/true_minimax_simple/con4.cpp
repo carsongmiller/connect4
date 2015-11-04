@@ -173,16 +173,16 @@ int main()
 			cout << "Failed to open debug stream";
 	#endif
 
-	int board[h_][w_]; //the main board
-	bool newGame = true;
-	int endOfGame; //6 = yes, 7 = no
-	int rowPlayed = 0; //stores the row in which the last disc was played
-	int colPlayed = 0; //stores the column in which the last disc was played
-	int whosTurn; //keeps track of who's turn it is (1 = player1/human, 2 = player2/computer)
-	int turn; //keeps track of how mant discs have been played
-	int MAX_DEPTH = 6;
-	int winner = 0;
-	int cutCount;
+	int board[h_][w_];		//the main board
+	bool newGame = true;	//whether to start a new game
+	int endOfGame;			//6 = yes, 7 = no
+	int rowPlayed = 0;		//stores the row in which the last disc was played
+	int colPlayed = 0;		//stores the column in which the last disc was played
+	int whosTurn;			//keeps track of who's turn it is (1 = player1/human, 2 = player2/computer)
+	int turn;				//keeps track of how mant discs have been played
+	int MAX_DEPTH;			//max depth of recursion for minimax
+	int winner = 0;			//winner at end of game
+	int cutCount;			//number of terminal nodes cut
 
 	while (newGame)
 	{
@@ -195,16 +195,14 @@ int main()
 
 		while (turn < w_*h_)
 		{
-			//if (turn < 7) MAX_DEPTH = 6;
-			if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
+			if (turn < 2) MAX_DEPTH = 4;
+			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
+			else MAX_DEPTH = 6;
 
 			if (whosTurn == 1) //player's turn
 			{
 				playerTurn(board, rowPlayed, colPlayed);
 				printScreen(board);
-
-				//cout << "MAX_DEPTH: " << MAX_DEPTH << endl;
-
 				if (winDetect(board, rowPlayed, colPlayed, pDisc))
 				{
 					winner = 1;
@@ -234,20 +232,24 @@ int main()
 			else whosTurn = 1;
 
 			turn++;
+			if (turn >= w_*h_) break;
 		}
 
 		//Displaying an end game message box
-			if (winner == 0)
-				endOfGame = MessageBox(NULL, TEXT("Cat's Game!\n\nPlay again?"),
-					TEXT("End of Game"), MB_YESNO);
-		
-			else if(winner == 1)
-				endOfGame = MessageBox(NULL, TEXT("You Win!\n\nPlay again?"),
-					TEXT("End of Game"), MB_YESNO);
-		
-			else if(winner == 2)
-				endOfGame = MessageBox(NULL, TEXT("The Computer Wins!\n\nPlay again?"),
-					TEXT("End of Game"), MB_YESNO);
+		switch (winner)
+		{
+		case 0:
+			endOfGame = MessageBox(NULL, TEXT("Cat's Game!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+
+		case 1:
+			endOfGame = MessageBox(NULL, TEXT("You Win!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+
+		case 2:
+			endOfGame = MessageBox(NULL, TEXT("The Computer Wins!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+		}
 
 		if (endOfGame == 6) newGame = true;
 		else if (endOfGame == 7) newGame = false;
@@ -277,14 +279,9 @@ int staticEval(int board[][w_], int maximizer, int turn)
 	else minimizer = cDisc;
 
 	int score = 0;
-	//int maxNearWinCount = 0, minNearWinCount = 0;
 	int maxVTrapCount = 0, minVTrapCount = 0;
 	int maxOneToWinCount = 0, minOneToWinCount = 0;
 
-	//maxNearWinCount = nearWinCount(board, maximizer);
-	//printScreen(board);
-	//minNearWinCount = nearWinCount(board, minimizer);
-	//printScreen(board);
 	maxOneToWinCount = oneToWinCount(board, maximizer);
 	//printScreen(board);
 	minOneToWinCount = oneToWinCount(board, minimizer);
@@ -300,17 +297,11 @@ int staticEval(int board[][w_], int maximizer, int turn)
 
 	#ifdef _STATIC_EVAL_DEBUG
 		//printBoard(board, debug);
-		//debug << "maxNearWinCount: " << maxNearWinCount << "\n";
-		//debug << "minNearWinCount: " << minNearWinCount << "\n";
 		debug << "maxVTrapCount: " << maxVTrapCount << "\n";
 		debug << "minVTrapCount: " << minVTrapCount << "\n";
 		debug << "maxOneToWinCount: " << maxOneToWinCount << "\n";
 		debug << "maxOneToWinCount: " << minOneToWinCount << "\n";
 	#endif
-
-
-	//score += 5 * maxNearWinCount;
-	//score -= 5 * minNearWinCount;
 
 	score += 50 * maxVTrapCount;
 	score -= 50 * minVTrapCount;
@@ -348,10 +339,6 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 	//"original_caller" keeps track of which player originally called minimax()
 	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = min, 2 = max)
-
-
-	//int newBoard[h_][w_]; //creating a copy of the board
-	//copyBoard(board, newBoard);
 	
 	int score[w_]; //creating clean score[] array
 	for (int i = 0; i < w_; i++)
@@ -465,16 +452,17 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 	for (int i = 0; i < w_; i++)
 		score[i] = INT_MIN; //initializing all indices to invalid
 
-	int R, C, cut;
+	int R, C = w_ / 2, cut;
+	int checkNum = 1; //keeps track of how many columns have been checked
 
-	for (C = 0; C < w_; C++)
+	while (checkNum <= w_)
 	{
-			if (alpha >= beta)
-			{	
-				cut = (w_ - C)*pow(7, MAX_DEPTH - depth);
-				cutCount += cut;
-				break;
-			}
+		if (alpha >= beta)
+		{
+			cut = (w_ - checkNum + 1)*pow(7, MAX_DEPTH - depth);
+			cutCount += cut;
+			break;
+		}
 
 		R = playMove(board, C, minormax);
 
@@ -492,9 +480,8 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			else if (depth == MAX_DEPTH)
 			{
 				score[C] = staticEval(board, maximizer, turn);
-
 				#ifdef _AB_DEBUG
-					debug << "Called staticEval()\n";
+								debug << "Called staticEval()\n";
 				#endif
 			}
 
@@ -511,50 +498,68 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			}
 
 			//Checking to reassign alpha and beta
-				if (score[C] != INT_MIN)
+			if (score[C] != INT_MIN)
+			{
+				if (minormax == cDisc && score[C] > alpha)
 				{
-					if (minormax == cDisc && score[C] > alpha)
-					{
-						alpha = score[C]; //reassigning alpha
-					}
-
-					else if (minormax == pDisc && score[C] < beta)
-					{
-						beta = score[C]; //reassigning beta
-					}
+					alpha = score[C]; //reassigning alpha
 				}
+
+				else if (minormax == pDisc && score[C] < beta)
+				{
+					beta = score[C]; //reassigning beta
+				}
+			}
 
 			unPlayMove(board, C);
 		}
+
+		if (checkNum % 2 == 1) C -= checkNum;
+		else C += checkNum;
+		checkNum++;
 	}
+
 
 
 	//initializing low and high to a valid cell
 		int low, high;
-		for (int i = 0; i < w_; i++) 
+		checkNum = 1;
+		C = w_ / 2;
+		while (checkNum <= w_)
 		{
-			if (score[i] != INT_MIN)
+			if (score[C] != INT_MIN)
 			{
-				low = i;
-				high = i;
+				low = C;
+				high = C;
 				break;
 			}
 
-			else if (i == w_ - 1)
+			else if (C == w_ - 1)
 				return INT_MIN; //if all cells are invalid
+
+			if (checkNum % 2 == 1) C -= checkNum;
+			else C += checkNum;
+			checkNum++;
 		}
 
 
+
 	//finding the highest and lowest cells
-		for (int i = 0; i < w_; i++)
+		checkNum = 1;
+		C = w_ / 2;
+		while (checkNum <= w_)
 		{
-			if (score[i] != INT_MIN)
+			if (score[C] != INT_MIN)
 			{
-				if (score[i] > score[high])
-					high = i;
-				else if (score[i] < score[low])
-					low = i;
+				if (score[C] > score[high])
+					high = C;
+				else if (score[C] < score[low])
+					low = C;
 			}
+
+			if (checkNum % 2 == 1) C -= checkNum;
+			else C += checkNum;
+			checkNum++;
 		}
 
 
@@ -569,26 +574,26 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			{
 				return low;
 			}
-		}
+			}
 
 		else
 		{
 			if (minormax == maximizer)
 			{
 				#ifdef _AB_DEBUG
-					debug << "Returning score of " << score[high] << "\n";
+							debug << "Returning score of " << score[high] << "\n";
 				#endif
 				return score[high];
 			}
 			else
 			{
 				#ifdef _AB_DEBUG
-					debug << "Returning score of " << score[low] << "\n";
+							debug << "Returning score of " << score[low] << "\n";
 				#endif
 				return score[low];
 			}
 		}
-}
+	}
 
 
 
@@ -597,57 +602,57 @@ bool winDetect(int board[][w_], int r, int c, int who)
 	int consec;
 
 	//checking for horizontal
-	consec = 0;
-	for (int i = c - 3; i <= c + 3; i++)
-	{
-		if (isValidCell(board, r, i) && board[r][i] == who)
+		consec = 0;
+		for (int i = c - 3; i <= c + 3; i++)
 		{
-			if (++consec >= 4)
-				return true;
+			if (isValidCell(board, r, i) && board[r][i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
 		}
-		else
-			consec = 0;
-	}
 
 	//checking for vertical
-	consec = 0;
-	for (int i = r - 3; i <= r + 3; i++)
-	{
-		if (isValidCell(board, i, c) && board[i][c] == who)
+		consec = 0;
+		for (int i = r - 3; i <= r + 3; i++)
 		{
-			if (++consec >= 4)
-				return true;
+			if (isValidCell(board, i, c) && board[i][c] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
 		}
-		else
-			consec = 0;
-	}
 
 
 	//checking for diagonal down
-	consec = 0;
-	for (int i = -3; i <= 3; i++)
-	{
-		if (isValidCell(board, r + i, c + i) && board[r + i][c + i] == who)
+		consec = 0;
+		for (int i = -3; i <= 3; i++)
 		{
-			if (++consec >= 4)
-				return true;
+			if (isValidCell(board, r + i, c + i) && board[r + i][c + i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
 		}
-		else
-			consec = 0;
-	}
 
 	//checking for diagonal up
-	consec = 0;
-	for (int i = -3; i <= 3; i++)
-	{
-		if (isValidCell(board, r - i, c + i) && board[r - i][c + i] == who)
+		consec = 0;
+		for (int i = -3; i <= 3; i++)
 		{
-			if (++consec >= 4)
-				return true;
+			if (isValidCell(board, r - i, c + i) && board[r - i][c + i] == who)
+			{
+				if (++consec >= 4)
+					return true;
+			}
+			else
+				consec = 0;
 		}
-		else
-			consec = 0;
-	}
 
 	return false;
 }
@@ -669,6 +674,7 @@ int nearWinCount(int board[][w_], int who)
 			{
 				unPlayMove(board, i);
 				count++;
+				if(count == 2) break;
 			}
 
 			else
@@ -868,12 +874,6 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 	#endif
 
 	cout << "COMPUTER'S TURN\n\nthinking ... ";
-	if (turn <= 1)
-	{
-		colPlayed = w_ / 2;
-		rowPlayed = playMove(board, colPlayed, cDisc);
-		return;
-	}
 
 	int nearWin = nearWinDetect(board, cDisc);
 	if (nearWin != -1)
@@ -1013,7 +1013,6 @@ void printScreen(int board[][w_])
 
 
 
-//Following code is pretty messy, but it works and makes a nice print out
 void printBoard(int board[][w_])
 {
 	for (int i = 1; i <= w_; i++)
