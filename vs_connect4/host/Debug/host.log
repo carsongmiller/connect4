@@ -1,0 +1,15 @@
+﻿Build started 1/31/2016 3:29:06 PM.
+     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\host\host.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yc"stdafx.h" /Fp"Debug\host.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"Debug\host.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt host.cpp
+         host.cpp
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\host\host.cpp(1): warning C4627: '#include <iostream>': skipped when looking for precompiled header use
+         c:\users\carson\documents\programming\connect4\vs_connect4\host\host.cpp(1): note: Add directive to 'stdafx.h' or rebuild precompiled header
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\host\host.cpp(8): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\host\host.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.23
