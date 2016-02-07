@@ -24,7 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="neuron.h">
+    <ClInclude Include="neuralnet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="host.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,7 +38,7 @@
     <ClCompile Include="con4_nn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="neuron.cpp">
+    <ClCompile Include="neuralnet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
