@@ -31,12 +31,12 @@ TO DO:
 
 #define _USE_AB
 
-#define w_ 7
-#define h_ 6
+#define w_				11
+#define h_				20
 
-#define pDisc 1
-#define cDisc 2
-#define nDisc 0
+#define pDisc			1
+#define cDisc			2
+#define nDisc			0
 
 using namespace std;
 
@@ -49,22 +49,26 @@ using namespace std;
 
 //Values for SetConsoleTextAttribute()
 
-#define BLACK 0
-#define BLUE 1
-#define GREEN 2
-#define CYAN 3
-#define RED 4
-#define MAGENTA 5
-#define BROWN 6
-#define LIGHTGRAY 7
-#define DARKGRAY 8
-#define LIGHTBLUE 9
-#define LIGHTGREEN 10
-#define LIGHTCYAN 11
-#define LIGHTRED 12
-#define LIGHTMAGENTA 13
-#define YELLOW 14
-#define WHITE 15
+#define BLACK			0
+#define BLUE			1
+#define GREEN			2
+#define CYAN			3
+#define RED				4
+#define MAGENTA			5
+#define BROWN			6
+#define LIGHTGRAY		7
+#define DARKGRAY		8
+#define LIGHTBLUE		9
+#define LIGHTGREEN		10
+#define LIGHTCYAN		11
+#define LIGHTRED		12
+#define LIGHTMAGENTA	13
+#define YELLOW			14
+#define WHITE			15
+
+#define PLAYER_COLOR	YELLOW
+#define COMP_COLOR		LIGHTRED
+#define GAME_COLOR		LIGHTCYAN
 
 
 /*
@@ -215,10 +219,13 @@ int main()
 				cutCount = 0;
 				compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH, cutCount);
 				printScreen(board);
-				cout << "The computer played in column ";
-				printColor(colPlayed+1, GREEN);
+				cout << "COMPUTER PLAYED: ";
+				printColor(colPlayed+1, GAME_COLOR);
 				cout << "\n\n";
-				cout << "CutCount: " << cutCount << "\n\n";
+
+				#ifdef _AB_DEBUG
+					cout << "CutCount: " << cutCount << "\n\n";
+				#endif
 
 				if (winDetect(board, rowPlayed, colPlayed, cDisc))
 				{
@@ -875,6 +882,8 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 	cout << "COMPUTER'S TURN\n\nthinking ... ";
 
+	Sleep(turn*.2);
+
 	int nearWin = nearWinDetect(board, cDisc);
 	if (nearWin != -1)
 	{
@@ -917,7 +926,7 @@ void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 	bool isValid;
 
 	isValid = false;
-	cout << "Where would you like to go? (enter column number): ";
+	cout << "Your move! (enter column number): ";
 	cin >> colPlayed;
 
 	while (!isValid)
@@ -930,7 +939,7 @@ void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 
 			Sleep(1000);
 
-			cout << "Where would you like to go? (enter column number): ";
+			cout << "Your move! (enter column number): ";
 			cin.clear();
 			cin.ignore();
 			cin >> colPlayed;
@@ -951,7 +960,7 @@ void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 
 			Sleep(1000);
 
-			cout << "Where would you like to go? (enter column number): ";
+			cout << "Your move! (enter column number): ";
 			cin.clear();
 			cin.ignore();
 			cin >> colPlayed;
@@ -1004,7 +1013,7 @@ PRINT FUNCTIONS
 void printScreen(int board[][w_])
 {
 	system("cls");
-	cout << "CONNECT 4!\n";
+	//cout << "CONNECT 4!\n";
 	printPlayerColors();
 	printBoard(board);
 	//cout << "MAX_DEPTH: " << MAX_DEPTH;
@@ -1018,7 +1027,7 @@ void printBoard(int board[][w_])
 	for (int i = 1; i <= w_; i++)
 	{
 		cout << "    ";
-		printColor(i, GREEN);
+		printColor(i, GAME_COLOR);
 		cout << "\t";
 	}
 
@@ -1050,9 +1059,9 @@ void printBoard(int board[][w_])
 			if (board[r][c] == nDisc)
 				cout << getChar(board, r, c);
 			else if (board[r][c] == pDisc)
-				printColor(getChar(board, r, c), LIGHTRED);
+				printColor(getChar(board, r, c), PLAYER_COLOR);
 			else if (board[r][c] == cDisc)
-				printColor(getChar(board, r, c), LIGHTBLUE);
+				printColor(getChar(board, r, c), COMP_COLOR);
 
 			cout << "   |   ";
 		}
@@ -1139,12 +1148,12 @@ void printBoard(int board[][w_], ofstream &output) //overloaded for debuging
 
 void printPlayerColors()
 {
-	cout << "Player: ";
-	printColor('O', LIGHTRED);
-	cout << endl;
-	cout << "Computer: ";
-	printColor('O', LIGHTBLUE);
-	cout << endl;
+	cout << "\n\t ";
+	printColor("PLAYER", PLAYER_COLOR);
+	for (int i = 0; i < w_ - 3; i++)
+		cout << "\t";
+	printColor("COMPUTER", COMP_COLOR);
+	cout << "\n\n";
 }
 
 
@@ -1157,6 +1166,8 @@ void printColor(string str, int color, ofstream &output) //overloaded for debugi
 	SetConsoleTextAttribute(H, WHITE);
 }
 
+
+
 void printColor(string str, int color)
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1164,6 +1175,8 @@ void printColor(string str, int color)
 	cout << str;
 	SetConsoleTextAttribute(H, WHITE);
 }
+
+
 
 void printColor(int i, int color, ofstream &output) //overloaded for debuging
 {
@@ -1173,6 +1186,8 @@ void printColor(int i, int color, ofstream &output) //overloaded for debuging
 	SetConsoleTextAttribute(H, WHITE);
 }
 
+
+
 void printColor(int i, int color)
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1181,6 +1196,8 @@ void printColor(int i, int color)
 	SetConsoleTextAttribute(H, WHITE);
 }
 
+
+
 void printColor(char c, int color, ofstream &output) //overloaded for debuging
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1188,6 +1205,8 @@ void printColor(char c, int color, ofstream &output) //overloaded for debuging
 	output << c;
 	SetConsoleTextAttribute(H, WHITE);
 }
+
+
 
 void printColor(char c, int color)
 {
@@ -1237,7 +1256,9 @@ int preGame()
 {
 	char first;
 
-	cout << "CONNECT 4!\n\nWho would you like to go first? (m for me, c for computer): ";
+	printColor("CONNECT 4!", GAME_COLOR);
+
+	cout << "\n\nWho goes first? (m for me, c for computer): ";
 	cin >> first;
 
 	while (true)
