@@ -31,8 +31,8 @@ TO DO:
 
 #define _USE_AB
 
-#define w_				11
-#define h_				20
+#define w_				9
+#define h_				8
 
 #define pDisc			1
 #define cDisc			2
@@ -882,8 +882,6 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 	cout << "COMPUTER'S TURN\n\nthinking ... ";
 
-	Sleep(turn*.2);
-
 	int nearWin = nearWinDetect(board, cDisc);
 	if (nearWin != -1)
 	{
@@ -903,8 +901,10 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		}
 	}
 
+	Sleep(turn * 200);
+
 	if(use_AB)
-		colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX, cutCount); //starting alpha and beta out arbitrarily large
+		colPlayed = ab_minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX, cutCount); //starting alpha/beta out arbitrarily small/large
 	else
 		colPlayed = minimax(board, cDisc, cDisc, 1, MAX_DEPTH, turn);
 	
