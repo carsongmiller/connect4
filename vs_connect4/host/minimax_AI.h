@@ -103,115 +103,6 @@ int staticEval(int board[][w_], int maximizer, int turn)
 
 
 
-int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn)
-{
-
-	//"original_caller" keeps track of which player originally called minimax()
-	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = min, 2 = max)
-
-	int score[w_]; //creating clean score[] array
-	for (int i = 0; i < w_; i++)
-		score[i] = 0;
-
-	int R, C;
-
-	for (C = 0; C < w_; C++)
-	{
-
-		R = playMove(board, C, minormax);
-		//printScreen(board);
-
-#ifdef _BOARD_DEBUG
-		printScreen(board);
-#endif
-
-		if (R != -1)
-		{
-			if (turn >= 8 && winDetect(board, R, C, minormax)) //checks for a win for original_caller
-			{
-
-				if (minormax == maximizer)
-					score[C] = 1000;
-
-				else
-					score[C] = -1000;
-			}
-
-			else if (depth == MAX_DEPTH)
-				score[C] = staticEval(board, maximizer, turn);
-
-			else
-			{
-				if (minormax == cDisc)
-					score[C] = minimax(board, maximizer, pDisc, depth + 1, MAX_DEPTH, turn + 1);
-				else
-					score[C] = minimax(board, maximizer, cDisc, depth + 1, MAX_DEPTH, turn + 1);
-			}
-
-			unPlayMove(board, C);
-			//printScreen(board);
-
-#ifdef _BOARD_DEBUG
-			printScreen(board);
-#endif
-		}
-
-		else
-			score[C] = INT_MIN; //INT_MIN will be the value for an invalid cell
-	}
-
-	int low, high;
-	//printScreen(board);
-
-	for (int i = 0; i < w_; i++) //initializing low and high to a valid cell
-	{
-		if (score[i] != INT_MIN)
-		{
-			low = i;
-			high = i;
-
-			break;
-		}
-	}
-
-	for (int i = 0; i < w_; i++)
-	{
-		if (score[i] != INT_MIN)
-		{
-			if (score[i] > score[high])
-				high = i;
-			else if (score[i] < score[low])
-				low = i;
-		}
-	}
-
-	if (depth == 1)
-	{
-		if (minormax == maximizer)
-		{
-			return high;
-		}
-		else
-		{
-			return low;
-		}
-	}
-
-	else
-	{
-		if (minormax == maximizer)
-		{
-			return score[high];
-		}
-		else
-		{
-			return score[low];
-		}
-	}
-}
-
-
-
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta)
 {
 	//"maximizer" keeps track of which player originally called minimax()
@@ -233,22 +124,32 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 		if (alpha >= beta)
 			break;
 
-		R = playMove(board, C, minormax);
+		if (minormax == 1)
+		{
+			if (maximizer == cDisc)	R = playMove(board, C, cDisc);
+			else R = playMove(board, C, pDisc);
+		}
+		else
+		{
+			if (minimizer == cDisc) R = playMove(board, C, cDisc);
+			else R = playMove(board, C, pDisc);
+		}
+		//printScreen(board);
 		
 		if (R != -1)
 		{
-			if (turn >= 8) //checks for a win for
+			if (turn >= 8)
 			{
-				if(minormax == 1 && winDetect(board, R, C, maximizer))
+				if (minormax == 1 && winDetect(board, R, C, maximizer))
 					score[C] = 1000;
-				else if(minormax == 2 && winDetect(board, R, C, minimizer))
+				else if (minormax == 2 && winDetect(board, R, C, minimizer))
 					score[C] = -1000;
 			}
 
-			else if (depth == MAX_DEPTH)
+			if (depth == MAX_DEPTH && score[C] == INT_MIN) //if at target depth and the score for the current column hasn't already been set
 				score[C] = staticEval(board, maximizer, turn);
 
-			else
+			else if(depth < MAX_DEPTH)
 			{
 				if (minormax == 1)
 					score[C] = ab_minimax(board, maximizer, 2, depth + 1, MAX_DEPTH, turn, alpha, beta);
@@ -267,6 +168,7 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 			}
 
 			unPlayMove(board, C);
+			//printScreen(board);
 		}
 
 		if (checkNum % 2 == 1) C -= checkNum;
@@ -321,7 +223,7 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 	//returning values to parent node
 	if (depth == 1)
 	{
-		if (minormax == maximizer)
+		if (minormax == 1)
 		{
 			return high;
 		}
@@ -333,20 +235,10 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 
 	else
 	{
-		if (minormax == maximizer)
-		{
-#ifdef _AB_DEBUG
-			debug << "Returning score of " << score[high] << "\n";
-#endif
+		if (minormax == 1)
 			return score[high];
-		}
 		else
-		{
-#ifdef _AB_DEBUG
-			debug << "Returning score of " << score[low] << "\n";
-#endif
 			return score[low];
-		}
 	}
 }
 
@@ -512,8 +404,6 @@ int oneToWinCount(int board[][w_], int who)
 
 void minimaxTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MAX_DEPTH, int whosTurn)
 {
-	cout << "COMPUTER'S TURN\n\nthinking ... ";
-
 	int notWhosTurn;
 	if (whosTurn == pDisc) notWhosTurn = cDisc;
 	else notWhosTurn = pDisc;
@@ -532,12 +422,10 @@ void minimaxTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int
 		if (nearWin != -1)
 		{
 			colPlayed = nearWin;
-			rowPlayed = playMove(board, colPlayed, notWhosTurn);
+			rowPlayed = playMove(board, colPlayed, whosTurn);
 			return;
 		}
 	}
-
-	//Sleep(turn * 200);
 
 	colPlayed = ab_minimax(board, whosTurn, 1, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX); //starting alpha/beta out arbitrarily small/large
 	rowPlayed = playMove(board, colPlayed, whosTurn);

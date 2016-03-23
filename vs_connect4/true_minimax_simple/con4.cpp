@@ -453,7 +453,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount)
 {
 	//"maximizer" keeps track of which player originally called minimax()
-	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = min, 2 = max)
+	//"minormax" keeps track of whether minimax() is currently evaulating a min or a max node (1 = max, 2 = min)
 
 	int score[w_]; //creating clean score[] array
 	for (int i = 0; i < w_; i++)

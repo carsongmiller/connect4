@@ -17,6 +17,14 @@ int main()
 	int turn;				//keeps track of how mant discs have been played
 	int MAX_DEPTH;			//max depth of recursion for minimax
 	int winner = 0;			//winner at end of game
+	/*
+	int board[h_][w_] = {
+		{ 0, 0, 2, 0, 0 },
+		{ 0, 1, 1, 0, 0 },
+		{ 0, 2, 1, 0, 0 },
+		{ 0, 2, 1, 2, 0 }
+	};
+	*/
 
 	while (newGame)
 	{
@@ -31,8 +39,11 @@ int main()
 		{
 			if (turn < 2) MAX_DEPTH = 4;
 			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
-			else MAX_DEPTH = 6;
+			else MAX_DEPTH = 7;
 
+			cout << "Press enter to continue";
+			//cin.ignore();
+			
 			if (whosTurn == 1) //player 1, corresponds to pDisc
 				minimaxTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH, whosTurn);
 

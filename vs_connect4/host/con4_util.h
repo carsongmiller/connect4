@@ -13,8 +13,8 @@
 #include <limits>
 #include <ctime>
 
-#define w_				9
-#define h_				8
+#define w_				7
+#define h_				6
 
 #define pDisc			1
 #define cDisc			2
