@@ -1,17 +1,17 @@
-﻿Build started 3/23/2016 2:57:27 PM.
-     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\host\host.vcxproj" on node 2 (Build target(s)).
+﻿Build started 3/23/2016 10:00:13 PM.
+     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\host\host.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (host.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Yu"stdafx.h" /Fp"Debug\CvC.pch" /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt host.cpp
          host.cpp
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\host\con4_util.h(549): warning C4101: 'first': unreferenced local variable
-     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\host\host.cpp(9): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\host\con4_util.h(490): warning C4101: 'first': unreferenced local variable
+     1>c:\users\carson\documents\programming\connect4\vs_connect4\host\host.cpp(9): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\CvC.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\CvC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\CvC.lib" /MACHINE:X86 Debug\host.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\CvC.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\CvC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\CvC.lib" /MACHINE:X86 Debug\host.obj
          Debug\stdafx.obj
-         host.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\CvC.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\host\host.vcxproj" (Build target(s)).
+         host.vcxproj -> C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\CvC.exe
+     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\host\host.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:03.36
+Time Elapsed 00:00:01.41

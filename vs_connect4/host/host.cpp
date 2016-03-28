@@ -39,10 +39,9 @@ int main()
 		{
 			if (turn < 2) MAX_DEPTH = 4;
 			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
-			else MAX_DEPTH = 7;
+			else MAX_DEPTH = 6;
 
-			cout << "Press enter to continue";
-			//cin.ignore();
+			cout << "Press enter to continue"; cin.ignore();
 			
 			if (whosTurn == 1) //player 1, corresponds to pDisc
 				minimaxTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH, whosTurn);

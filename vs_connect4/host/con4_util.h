@@ -115,66 +115,7 @@ OTHER HELPER FUNCTIONS
 	//checks if the disc at board[r][c] has won
 	bool winDetect(int board[][w_], int r, int c, int who);
 	
-	//checks for a win including the given row and column
-	bool winDetect(int board[][w_], int r, int c, int who)
-{
-	int consec;
 
-	//checking for horizontal
-	consec = 0;
-	for (int i = c - 3; i <= c + 3; i++)
-	{
-		if (isValidCell(board, r, i) && board[r][i] == who)
-		{
-			if (++consec >= 4)
-				return true;
-		}
-		else
-			consec = 0;
-	}
-
-	//checking for vertical
-	consec = 0;
-	for (int i = r - 3; i <= r + 3; i++)
-	{
-		if (isValidCell(board, i, c) && board[i][c] == who)
-		{
-			if (++consec >= 4)
-				return true;
-		}
-		else
-			consec = 0;
-	}
-
-
-	//checking for diagonal down
-	consec = 0;
-	for (int i = -3; i <= 3; i++)
-	{
-		if (isValidCell(board, r + i, c + i) && board[r + i][c + i] == who)
-		{
-			if (++consec >= 4)
-				return true;
-		}
-		else
-			consec = 0;
-	}
-
-	//checking for diagonal up
-	consec = 0;
-	for (int i = -3; i <= 3; i++)
-	{
-		if (isValidCell(board, r - i, c + i) && board[r - i][c + i] == who)
-		{
-			if (++consec >= 4)
-				return true;
-		}
-		else
-			consec = 0;
-	}
-
-	return false;
-}
 
 
 
@@ -553,4 +494,68 @@ void preGame()
 	cout << "Press enter to begin";
 	cin.ignore();
 }
+
+
+
+bool winDetect(int board[][w_], int r, int c, int who)
+{
+	int consec;
+
+	//checking for horizontal
+	consec = 0;
+	for (int i = c - 3; i <= c + 3; i++)
+	{
+		if (isValidCell(board, r, i) && board[r][i] == who)
+		{
+			if (++consec >= 4)
+				return true;
+		}
+		else
+			consec = 0;
+	}
+
+	//checking for vertical
+	consec = 0;
+	for (int i = r - 3; i <= r + 3; i++)
+	{
+		if (isValidCell(board, i, c) && board[i][c] == who)
+		{
+			if (++consec >= 4)
+				return true;
+		}
+		else
+			consec = 0;
+	}
+
+
+	//checking for diagonal down
+	consec = 0;
+	for (int i = -3; i <= 3; i++)
+	{
+		if (isValidCell(board, r + i, c + i) && board[r + i][c + i] == who)
+		{
+			if (++consec >= 4)
+				return true;
+		}
+		else
+			consec = 0;
+	}
+
+	//checking for diagonal up
+	consec = 0;
+	for (int i = -3; i <= 3; i++)
+	{
+		if (isValidCell(board, r - i, c + i) && board[r - i][c + i] == who)
+		{
+			if (++consec >= 4)
+				return true;
+		}
+		else
+			consec = 0;
+	}
+
+	return false;
+}
+
+
 #endif
