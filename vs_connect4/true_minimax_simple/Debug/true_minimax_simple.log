@@ -1,16 +1,16 @@
-﻿Build started 3/23/2016 9:59:26 PM.
-     1>Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\true_minimax_simple\true_minimax_simple.vcxproj" on node 2 (Build target(s)).
+﻿Build started 3/31/2016 4:53:21 PM.
+     1>Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\true_minimax_simple\true_minimax_simple.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt con4.cpp
          con4.cpp
-     1>c:\users\carson\documents\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(175): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-     1>c:\users\carson\documents\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(474): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
-     1>c:\users\carson\documents\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(1309): warning C4018: '<': signed/unsigned mismatch
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(175): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(474): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+     1>c:\users\carson\documents\carson\programming\connect4\vs_connect4\true_minimax_simple\con4.cpp(1309): warning C4018: '<': signed/unsigned mismatch
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\true_minimax_simple.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\true_minimax_simple.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\true_minimax_simple.lib" /MACHINE:X86 Debug\con4.obj
-         true_minimax_simple.vcxproj -> C:\Users\Carson\Documents\Programming\connect4\vs_connect4\Debug\true_minimax_simple.exe
-     1>Done Building Project "C:\Users\Carson\Documents\Programming\connect4\vs_connect4\true_minimax_simple\true_minimax_simple.vcxproj" (Build target(s)).
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\true_minimax_simple.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\true_minimax_simple.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\true_minimax_simple.lib" /MACHINE:X86 Debug\con4.obj
+         true_minimax_simple.vcxproj -> C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\Debug\true_minimax_simple.exe
+     1>Done Building Project "C:\Users\Carson\Documents\Carson\Programming\connect4\vs_connect4\true_minimax_simple\true_minimax_simple.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:02.31
+Time Elapsed 00:00:04.34

@@ -226,7 +226,7 @@ int main()
 				printColor(colPlayed+1, GAME_COLOR);
 				cout << "\n\n";
 
-				cout << "CutCount: " << cutCount << "\n\n";
+				//cout << "CutCount: " << cutCount << "\n\n";
 
 				#ifdef _AB_DEBUG
 					cout << "CutCount: " << cutCount << "\n\n";
