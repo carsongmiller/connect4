@@ -38,6 +38,10 @@ TO DO:
 #define cDisc			2
 #define nDisc			0
 
+#define LONG_THOUGHT	false
+#define TYPICAL_DEPTH	8
+#define EARLY_DEPTH		4
+
 using namespace std;
 
 //int MAX_DEPTH;
@@ -80,7 +84,7 @@ ALGORITHMS/HEURISTICS
 //does a static evaluation of the board
 int staticEval(int board[][w_], int maximizer, int turn);
 
-//ultimate returns column of the best move for the computer
+//ultimately returns column of the best move for the computer
 int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn);
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount);
 
@@ -90,16 +94,19 @@ bool winDetect(int board[][w_], int r, int c, int who);
 //checks if "who" is one disc away from winning (returns column to block)
 int nearWinDetect(int board[][w_], int who);
 
-//counts how many places "who" could win in one move
+//returns the number of places "who" could win in one move
 int nearWinCount(int board[][w_], int who);
 
-//checks if "who" has two places they could win stacked on top of eachother (returns column)
+//returns the number of verticle traps that "who" has on the board
+int vTrapCount(int board[][w_], int who);
+
+//returns the column of first verticle trap found (or -1 if none found)
 int vTrapDetect(int board[][w_], int who);
 
-//checks if "who" has a horizontal trap set up (O X X X O) (returns right open column)
+//returns whether "who" has a horizontal trap set up (O X X X O) (returns right open column)
 bool hTrapDetect(int board[][w_], int who);
 
-//counts the # of places on the board (even if they're not available yet) where one disc could complete a string of 4
+//returns the # of places on the board (even if they're not available yet) where one disc could complete a string of 4
 int oneToWinCount(int board[][w_], int who);
 
 /*
@@ -177,16 +184,15 @@ int main()
 		cout << "Failed to open debug stream";
 #endif
 
-	int board[h_][w_] = 
+	int board[h_][w_] = 		//the main board
 	{
-		{0, 0, 0, 2, 0, 0, 0},
-		{0, 0, 0, 2, 0, 0, 0},
-		{2, 0, 2, 2, 0, 2, 0},
-		{1, 0, 1, 1, 1, 2, 2},
-		{2, 0, 2, 2, 1, 1, 2},
-		{1, 1, 1, 2, 2, 1, 1}
+		{1, 0, 2, 2, 2, 0, 0},
+		{1, 0, 2, 2, 2, 0, 0},
+		{2, 0, 1, 1, 2, 0, 0},
+		{1, 0, 1, 2, 1, 0, 0},
+		{1, 2, 1, 2, 2, 0, 0},
+		{2, 1, 2, 2, 1, 2, 2}
 	};
-
 	bool newGame = true;	//whether to start a new game
 	int endOfGame;			//6 = yes, 7 = no
 	int rowPlayed = 0;		//stores the row in which the last disc was played
@@ -197,10 +203,81 @@ int main()
 	int winner = 0;			//winner at end of game
 	int cutCount;			//number of terminal nodes cut
 
-	printScreen(board);
-	cout << "vTrapCount: " << vTrapDetect(board, cDisc);
-	cin.ignore();
+	while (newGame)
+	{
+		//boardInit(board);
+		system("cls");
+		whosTurn = preGame();
+		printScreen(board);
 
+		turn = 0;
+
+		while (turn < w_*h_)
+		{
+			if (turn < 2) MAX_DEPTH = EARLY_DEPTH;
+			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
+			else MAX_DEPTH = TYPICAL_DEPTH;
+
+			if (whosTurn == 1) //player's turn
+			{
+				playerTurn(board, rowPlayed, colPlayed);
+				printScreen(board);
+				if (winDetect(board, rowPlayed, colPlayed, pDisc))
+				{
+					winner = 1;
+					break;
+				}
+			}
+
+			else if (whosTurn == 2) //computer's turn
+			{
+				cutCount = 0;
+				compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH, cutCount);
+				printScreen(board);
+				cout << "COMPUTER PLAYED: ";
+				printColor(colPlayed + 1, GAME_COLOR);
+				cout << "\n\n";
+
+				//cout << "CutCount: " << cutCount << "\n\n";
+
+#ifdef _AB_DEBUG
+				cout << "CutCount: " << cutCount << "\n\n";
+#endif
+
+				if (winDetect(board, rowPlayed, colPlayed, cDisc))
+				{
+					winner = 2;
+					break;
+				}
+				Sleep(1000);
+			}
+
+			if (whosTurn == 1) whosTurn = 2;
+			else whosTurn = 1;
+
+			turn++;
+			if (turn >= w_*h_) break;
+		}
+
+		//Displaying an end game message box
+		switch (winner)
+		{
+		case 0:
+			endOfGame = MessageBox(NULL, TEXT("Cat's Game!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+
+		case 1:
+			endOfGame = MessageBox(NULL, TEXT("You Win!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+
+		case 2:
+			endOfGame = MessageBox(NULL, TEXT("The Computer Wins!\n\nPlay again?"), TEXT("End of Game"), MB_YESNO);
+			break;
+		}
+
+		if (endOfGame == 6) newGame = true;
+		else if (endOfGame == 7) newGame = false;
+	}
 	return 0;
 }
 
@@ -236,9 +313,9 @@ int staticEval(int board[][w_], int maximizer, int turn)
 
 	if (turn >= 10)
 	{
-		maxVTrapCount = vTrapDetect(board, maximizer);
+		maxVTrapCount = vTrapCount(board, maximizer);
 		//printScreen(board);
-		minVTrapCount = vTrapDetect(board, minimizer);
+		minVTrapCount = vTrapCount(board, minimizer);
 		//printScreen(board);
 	}
 
@@ -663,14 +740,14 @@ int nearWinDetect(int board[][w_], int who)
 
 
 
-int vTrapDetect(int board[][w_], int who)
+int vTrapCount(int board[][w_], int who)
 {
 	int prev, trapCount = 0, notWho;
 
 	if (who == cDisc) notWho = pDisc;
 	else notWho = cDisc;
 
-	for (int c = 0; c < w_; c++)
+	for (int c = 0; c < w_; c++) //nested for loops cycle through all possible vTrap locations
 	{
 		for (int r = 1; r < h_; r++)
 		{
@@ -700,6 +777,52 @@ int vTrapDetect(int board[][w_], int who)
 		}
 	}
 	return trapCount;
+}
+
+
+
+//returns the column of first verticle trap found (or -1 if none found)
+int vTrapDetect(int board[][w_], int who)
+{
+	int prev, notWho;
+
+	if (who == cDisc) notWho = pDisc;
+	else notWho = cDisc;
+
+	for (int c = 0; c < w_; c++) //nested for loops cycle through all possible vTrap locations
+	{
+		for (int r = 1; r < h_; r++)
+		{
+			if (board[r][c] == nDisc) //only checks for traps at all if the initial cell to be checked is empty (implies cell above is empty too)
+			{
+				board[r][c] = who; //set fist cell at which we will check for wins to "who"
+				prev = setCell(board, r + 1, c, nDisc); //avoids vertical win detection
+
+				if (winDetect(board, r, c, who)) //if "who" has a win at [r][c]
+				{
+					board[r][c] = notWho; //about to check if not who also has a win at [r][c] (would negate any verticle trap)
+					if (!winDetect(board, r, c, notWho))
+					{
+						board[r - 1][c] = who; //set second cell at which we will check for wins to "who"
+						if (winDetect(board, r - 1, c, who)) // if the second cell we checked had a win for "who"
+						{
+							board[r][c] = nDisc; //resetting [r][c] to clear before returning true
+							board[r - 1][c] = nDisc; //resetting [r-1][c] to clear before returning true
+							return c;
+						}
+
+						board[r - 1][c] = nDisc; //clearing the second cell we checked
+					}
+				}
+
+				board[r + 1][c] = prev; //replacing the cell we cleared to avoid verticle win detection
+				board[r][c] = nDisc; //clearing the first cell we checked
+			}
+			else
+				break;
+		}
+	}
+	return -1;
 }
 
 
@@ -838,7 +961,16 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		}
 	}
 
-	Sleep(turn * 200);
+	nearWin = vTrapDetect(board, cDisc);
+	if (nearWin != -1)
+	{
+		colPlayed = nearWin;
+		rowPlayed = playMove(board, colPlayed, cDisc);
+	}
+
+
+	if (LONG_THOUGHT)
+		Sleep(turn * 200);
 
 	if (use_AB)
 		colPlayed = ab_minimax(board, cDisc, 2, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX, cutCount); //starting alpha/beta out arbitrarily small/large

@@ -38,6 +38,10 @@ TO DO:
 #define cDisc			2
 #define nDisc			0
 
+#define LONG_THOUGHT	false
+#define TYPICAL_DEPTH	8
+#define EARLY_DEPTH		4
+
 using namespace std;
 
 //int MAX_DEPTH;
@@ -202,9 +206,9 @@ int main()
 
 		while (turn < w_*h_)
 		{
-			if (turn < 2) MAX_DEPTH = 4;
+			if (turn < 2) MAX_DEPTH = EARLY_DEPTH;
 			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
-			else MAX_DEPTH = 9;
+			else MAX_DEPTH = TYPICAL_DEPTH;
 
 			if (whosTurn == 1) //player's turn
 			{
@@ -281,6 +285,7 @@ ALGORITHMS/HEURISTICS
 
 
 
+//-returns a score for a static state of the board
 int staticEval(int board[][w_], int maximizer, int turn)
 {
 	//Checking for win detection will be taken care of in minimax()
@@ -346,6 +351,8 @@ int staticEval(int board[][w_], int maximizer, int turn)
 
 
 
+
+//-implementation of minimax algorithm without alpha beta pruning
 int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn)
 {
 
@@ -455,6 +462,7 @@ int minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEP
 
 
 
+//-implementation of minimax algorithm with alpha beta pruning
 int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_DEPTH, int turn, int alpha, int beta, int &cutCount)
 {
 	//"maximizer" keeps track of which player originally called minimax()
@@ -610,6 +618,9 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 
 
 
+
+//-detects wins for "who" given last cell played into
+//-returns true if win found, false if not
 bool winDetect(int board[][w_], int r, int c, int who)
 {
 	int consec;
@@ -672,6 +683,7 @@ bool winDetect(int board[][w_], int r, int c, int who)
 
 
 
+//-counts the number of places that "who" could win immediately
 int nearWinCount(int board[][w_], int who)
 {
 	int rowPlayed;
@@ -702,6 +714,7 @@ int nearWinCount(int board[][w_], int who)
 
 
 
+//-returns the column in which "who" could play to win immediately (or -1 if no such column)
 int nearWinDetect(int board[][w_], int who)
 {
 	int rowPlayed;
@@ -728,6 +741,7 @@ int nearWinDetect(int board[][w_], int who)
 
 
 
+//-returns the number of verticle traps on the board for who
 int vTrapCount(int board[][w_], int who)
 {
 	int prev, trapCount = 0, notWho;
@@ -769,7 +783,8 @@ int vTrapCount(int board[][w_], int who)
 
 
 
-int vTrapDetect(int board[][w_], int who) //returns the column of first verticle trap found (or -1 if none found)
+//-returns the column of first verticle trap found (or -1 if none found)
+int vTrapDetect(int board[][w_], int who)
 {
 	int prev, notWho;
 
@@ -792,7 +807,11 @@ int vTrapDetect(int board[][w_], int who) //returns the column of first verticle
 					{
 						board[r - 1][c] = who; //set second cell at which we will check for wins to "who"
 						if (winDetect(board, r - 1, c, who)) // if the second cell we checked had a win for "who"
+						{
+							board[r][c] = nDisc; //resetting [r][c] to clear before returning true
+							board[r - 1][c] = nDisc; //resetting [r-1][c] to clear before returning true
 							return c;
+						}
 
 						board[r - 1][c] = nDisc; //clearing the second cell we checked
 					}
@@ -810,6 +829,8 @@ int vTrapDetect(int board[][w_], int who) //returns the column of first verticle
 
 
 
+//-detects if there is a horizontal trap for "who" on the board
+//-returns true if trap found, false if not
 bool hTrapDetect(int board[][w_], int who)
 {
 	int count;
@@ -844,6 +865,8 @@ bool hTrapDetect(int board[][w_], int who)
 
 
 
+//-returns # of cells that "who" could play into to win
+//-includes cells not immediately accessible
 int oneToWinCount(int board[][w_], int who)
 {
 	int count = 0;
@@ -878,7 +901,8 @@ BOARD MANIPULATION
 */
 
 
-
+//-plays a disc for "who" in the given column if possible (column not full)
+//-if given column is full, returns -1
 int playMove(int board[][w_], int col, int who)
 {
 	for (int i = h_ - 1; i >= 0; i--)
@@ -894,7 +918,8 @@ int playMove(int board[][w_], int col, int who)
 }
 
 
-
+//-removes the last disc played in the given column
+//-returns true if operation successful, false otherwise (column already empty)
 bool unPlayMove(int board[][w_], int col)
 {
 	for (int i = h_ - 1; i > 0; i--)
@@ -916,6 +941,7 @@ bool unPlayMove(int board[][w_], int col)
 
 
 
+//-main controller function for computer's turn
 void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MAX_DEPTH, int &cutCount)
 {
 	bool use_AB = false;
@@ -944,7 +970,16 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		}
 	}
 
-	Sleep(turn * 200);
+	nearWin = vTrapDetect(board, cDisc);
+	if (nearWin != -1)
+	{
+		colPlayed = nearWin;
+		rowPlayed = playMove(board, colPlayed, cDisc);
+	}
+
+
+	if(LONG_THOUGHT)
+		Sleep(turn * 200);
 
 	if(use_AB)
 		colPlayed = ab_minimax(board, cDisc, 2, 1, MAX_DEPTH, turn, INT_MIN, INT_MAX, cutCount); //starting alpha/beta out arbitrarily small/large
@@ -962,6 +997,7 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 
 
 
+//-main controller function for playerTurn
 void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 {
 	//takes care of most of a human player's turn
@@ -1016,6 +1052,7 @@ void playerTurn(int board[][w_], int &rowPlayed, int &colPlayed)
 
 
 
+//-initializes all cells in the board to nDisc
 void boardInit(int board[][w_])
 {
 	for (int r = 0; r < h_; r++)
@@ -1029,6 +1066,7 @@ void boardInit(int board[][w_])
 
 
 
+//-sets the cell board[r][c] to who with no logical checks
 int setCell(int board[][w_], int r, int c, int who)
 {
 	int prev = board[r][c];
@@ -1053,6 +1091,7 @@ PRINT FUNCTIONS
 
 
 
+//-prints the screen with pretty formatting
 void printScreen(int board[][w_])
 {
 	system("cls");
@@ -1065,6 +1104,7 @@ void printScreen(int board[][w_])
 
 
 
+//-prints only the game board
 void printBoard(int board[][w_])
 {
 	for (int i = 1; i <= w_; i++)
@@ -1127,6 +1167,7 @@ void printBoard(int board[][w_])
 
 
 
+//prints the gameboard to the given ofstream
 void printBoard(int board[][w_], ofstream &output) //overloaded for debuging
 {
 	for (int i = 1; i <= w_; i++)
@@ -1189,6 +1230,7 @@ void printBoard(int board[][w_], ofstream &output) //overloaded for debuging
 
 
 
+//-prints the words "PLAYER" and "COMPUTER" in their respective colors
 void printPlayerColors()
 {
 	cout << "\n\t ";
@@ -1201,6 +1243,7 @@ void printPlayerColors()
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(string str, int color, ofstream &output) //overloaded for debuging
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1211,6 +1254,7 @@ void printColor(string str, int color, ofstream &output) //overloaded for debugi
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(string str, int color)
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1221,6 +1265,7 @@ void printColor(string str, int color)
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(int i, int color, ofstream &output) //overloaded for debuging
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1231,6 +1276,7 @@ void printColor(int i, int color, ofstream &output) //overloaded for debuging
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(int i, int color)
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1241,6 +1287,7 @@ void printColor(int i, int color)
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(char c, int color, ofstream &output) //overloaded for debuging
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1251,6 +1298,7 @@ void printColor(char c, int color, ofstream &output) //overloaded for debuging
 
 
 
+//-prints text in color (multiple overloads)
 void printColor(char c, int color)
 {
 	HANDLE H = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -1271,6 +1319,8 @@ OTHER HELPER FUNCTIONS
 
 
 
+//-returns the character corresponding to the disc at board[r][c]
+//-either 'X' 'O' or ' '
 char getChar(int board[][w_], int r, int c)
 {
 	if (board[r][c] == nDisc)
@@ -1285,6 +1335,7 @@ char getChar(int board[][w_], int r, int c)
 
 
 
+//-returns true if cell is in bounds of the board, false otherwise
 bool isValidCell(int board[][w_], int r, int c)
 {
 	if (r >= 0 && r < h_ && c >= 0 && c < w_)
@@ -1295,6 +1346,7 @@ bool isValidCell(int board[][w_], int r, int c)
 
 
 
+//-handles pregame stuff like deciding who goes first
 int preGame()
 {
 	string first;
