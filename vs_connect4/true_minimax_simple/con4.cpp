@@ -269,7 +269,10 @@ int main()
 
 		if (endOfGame == 6) newGame = true;
 		else if (endOfGame == 7) newGame = false;
+		else newGame = false;
 	}
+
+	printBoard(board);
 	return 0;
 }
 
@@ -829,6 +832,7 @@ int vTrapDetect(int board[][w_], int who)
 
 
 
+
 //-detects if there is a horizontal trap for "who" on the board
 //-returns true if trap found, false if not
 bool hTrapDetect(int board[][w_], int who)
@@ -970,12 +974,14 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		}
 	}
 
+	/*
 	nearWin = vTrapDetect(board, cDisc);
 	if (nearWin != -1)
 	{
 		colPlayed = nearWin;
 		rowPlayed = playMove(board, colPlayed, cDisc);
 	}
+	*/
 
 
 	if(LONG_THOUGHT)
