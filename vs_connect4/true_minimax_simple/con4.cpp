@@ -40,7 +40,7 @@ TO DO:
 
 #define LONG_THOUGHT	false
 #define TYPICAL_DEPTH	8
-#define EARLY_DEPTH		4
+#define EARLY_DEPTH		8
 
 using namespace std;
 
@@ -201,13 +201,13 @@ int main()
 		system("cls");
 		whosTurn = preGame();
 		printScreen(board);
+		MAX_DEPTH = TYPICAL_DEPTH;
 
 		turn = 0;
 
 		while (turn < w_*h_)
 		{
-			if (turn < 2) MAX_DEPTH = EARLY_DEPTH;
-			else if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
+			if (MAX_DEPTH > w_*h_ - turn) MAX_DEPTH = w_*h_ - turn;
 			else MAX_DEPTH = TYPICAL_DEPTH;
 
 			if (whosTurn == 1) //player's turn
