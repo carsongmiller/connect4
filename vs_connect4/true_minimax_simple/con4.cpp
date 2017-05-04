@@ -3,16 +3,6 @@
 //10-7-2015
 
 
-/*
-
-TO DO:
-
--make sure alpha beta pruning is working correctly
-
-*/
-
-
-
 #include <iostream>
 #include <fstream>
 #include <windows.h>
@@ -22,6 +12,7 @@ TO DO:
 #include <cmath>
 #include <limits>
 #include <ctime>
+#include <time.h>
 
 //#define _DEBUG
 
@@ -42,9 +33,9 @@ TO DO:
 #define TYPICAL_DEPTH	8
 #define EARLY_DEPTH		8
 
-using namespace std;
+#define TIME_STATS		TRUE
 
-//int MAX_DEPTH;
+using namespace std;
 
 #ifdef _DEBUG
 	ofstream debug;
@@ -178,22 +169,37 @@ int main()
 {
 	srand(time(0));
 
+	HWND console = GetConsoleWindow();
+	RECT r;
+	GetWindowRect(console, &r);
+	MoveWindow(console, r.left, 100, (w_*72) + 100, 250 + (h_*72), TRUE);
+
+	//HWND hwnd = GetConsoleWindow();
+	//if (hwnd != NULL) { MoveWindow(hwnd, 340, 550, 680, 150, TRUE); }
+
 	#ifdef _DEBUG
 		debug.open("debug.txt");
 		if (debug.fail())
 			cout << "Failed to open debug stream";
 	#endif
 
-	int board[h_][w_];		//the main board
-	bool newGame = true;	//whether to start a new game
-	int endOfGame;			//6 = yes, 7 = no
-	int rowPlayed = 0;		//stores the row in which the last disc was played
-	int colPlayed = 0;		//stores the column in which the last disc was played
-	int whosTurn;			//keeps track of who's turn it is (1 = player1/human, 2 = player2/computer)
-	int turn;				//keeps track of how mant discs have been played
-	int MAX_DEPTH;			//max depth of recursion for minimax
-	int winner = 0;			//winner at end of game
-	int cutCount;			//number of terminal nodes cut
+
+	int board[h_][w_];				//the main board
+	bool newGame = true;			//whether to start a new game
+	int endOfGame;					//6 = yes, 7 = no
+	int rowPlayed = 0;				//stores the row in which the last disc was played
+	int colPlayed = 0;				//stores the column in which the last disc was played
+	int whosTurn;					//keeps track of who's turn it is (1 = player1/human, 2 = player2/computer)
+	int turn;						//keeps track of how mant discs have been played
+	int MAX_DEPTH;					//max depth of recursion for minimax
+	int winner = 0;					//winner at end of game
+	int cutCount;					//number of terminal nodes cut
+	clock_t t;						//CPU time temp variable
+	double timeElapsed;				//CPU time for computer's turn
+	double totalTime;
+	double averageTime;				//average CPU time per computer turn
+	double averageTimeAfter4;		//average CPU time per turn not counting turns 1-4
+
 
 	while (newGame)
 	{
@@ -202,6 +208,9 @@ int main()
 		whosTurn = preGame();
 		printScreen(board);
 		MAX_DEPTH = TYPICAL_DEPTH;
+		averageTime = 0;
+		averageTimeAfter4 = 0;
+		totalTime = 0;
 
 		turn = 0;
 
@@ -224,8 +233,22 @@ int main()
 			else if (whosTurn == 2) //computer's turn
 			{
 				cutCount = 0;
+				t = clock(); //start timer
 				compTurn(board, rowPlayed, colPlayed, turn, MAX_DEPTH, cutCount);
+				t = clock() - t;
+				timeElapsed = (double)t/CLOCKS_PER_SEC;
+				averageTime += timeElapsed;
+				if (turn > 3) averageTimeAfter4 += timeElapsed;
 				printScreen(board);
+
+				if (TIME_STATS)
+				{
+					cout << "This Turn:\t\t" << timeElapsed << endl;
+					cout << "Average Time:\t\t" << averageTime / (turn + 1) << endl;
+					cout << "Average After 4:\t" << averageTimeAfter4 / (turn - 3) << endl << endl;
+				}
+
+				Sleep(1500); //user friendly delay
 				cout << "COMPUTER PLAYED: ";
 				printColor(colPlayed+1, GAME_COLOR);
 				cout << "\n\n";
@@ -340,7 +363,7 @@ int staticEval(int board[][w_], int maximizer, int turn)
 		if (hTrapDetect(board, minimizer))
 		{
 			//printScreen(board);
-			score -= 2;
+			score -= 5000000;
 		}
 
 
@@ -894,6 +917,42 @@ int oneToWinCount(int board[][w_], int who)
 
 
 
+//returns a column the computer should play in to stop an immediate hTrap in the first row
+int immediateHTrapBlock(int board[][w_], int who)
+{
+	int notWho;
+	if (who == cDisc) notWho = pDisc;
+	else notWho = cDisc;
+	int r = 5;
+
+	for (int c = 1; c < w_ - 3; c++)
+	{
+		if (board[r][c] == notWho && board[r][c + 1] == notWho)
+		{
+			if	
+			(
+				(
+					board[r][c - 1] == nDisc && isValidCell(board, r, c - 1) &&
+					board[r][c - 2] == nDisc && isValidCell(board, r, c - 2) &&
+					board[r][c + 2] == nDisc && isValidCell(board, r, c + 2)
+				)
+				||
+				(
+					board[r][c - 1] == nDisc && isValidCell(board, r, c - 1) &&
+					board[r][c + 2] == nDisc && isValidCell(board, r, c + 2) &&
+					board[r][c + 3] == nDisc && isValidCell(board, r, c + 3)
+				)
+			)
+			return (c - 1);
+		}
+	}
+
+	return -1;
+	
+}
+
+
+
 
 
 /*
@@ -982,6 +1041,15 @@ void compTurn(int board[][w_], int &rowPlayed, int &colPlayed, int &turn, int MA
 		rowPlayed = playMove(board, colPlayed, cDisc);
 	}
 	*/
+
+	int hTrapCol = immediateHTrapBlock(board, cDisc);
+
+	if (hTrapCol > -1)
+	{
+		colPlayed = hTrapCol;
+		rowPlayed = playMove(board, colPlayed, cDisc);
+		return;
+	}
 
 
 	if(LONG_THOUGHT)
