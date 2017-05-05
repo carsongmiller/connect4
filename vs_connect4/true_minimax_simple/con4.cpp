@@ -205,7 +205,8 @@ int main()
 	{
 		boardInit(board);
 		system("cls");
-		whosTurn = preGame();
+		//whosTurn = preGame();
+		whosTurn = cDisc;
 		printScreen(board);
 		MAX_DEPTH = TYPICAL_DEPTH;
 		averageTime = 0;
@@ -246,6 +247,7 @@ int main()
 					cout << "This Turn:\t\t" << timeElapsed << endl;
 					cout << "Average Time:\t\t" << averageTime / (turn + 1) << endl;
 					cout << "Average After 4:\t" << averageTimeAfter4 / (turn - 3) << endl << endl;
+					cout << "Turn: \t\t\t" << turn + 1 << endl;
 				}
 
 				Sleep(1500); //user friendly delay
@@ -346,11 +348,14 @@ int staticEval(int board[][w_], int maximizer, int turn)
 		debug << "maxOneToWinCount: " << minOneToWinCount << "\n";
 	#endif
 
-	score += 50 * maxVTrapCount;
-	score -= 50 * minVTrapCount;
+		int vTrapWeight = 3;
+		int oneToWinWeight = 10;
 
-	score += 10 * maxOneToWinCount;
-	score -= 10 * minOneToWinCount;
+	score += vTrapWeight * maxVTrapCount;
+	score -= vTrapWeight * minVTrapCount;
+
+	score += oneToWinWeight * maxOneToWinCount;
+	score -= oneToWinWeight * minOneToWinCount;
 
 
 	//Check horizontal wins
@@ -497,6 +502,8 @@ int ab_minimax(int board[][w_], int maximizer, int minormax, int depth, int MAX_
 	int score[w_]; //creating clean score[] array
 	for (int i = 0; i < w_; i++)
 		score[i] = INT_MIN; //initializing all indices to invalid
+
+
 
 	int R, C = w_ / 2, cut;
 	int checkNum = 1; //keeps track of how many columns have been checked
