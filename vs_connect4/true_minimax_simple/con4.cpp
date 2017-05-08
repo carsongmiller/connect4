@@ -199,6 +199,7 @@ int main()
 	double totalTime;
 	double averageTime;				//average CPU time per computer turn
 	double averageTimeAfter4;		//average CPU time per turn not counting turns 1-4
+	int averageCutCount;
 
 
 	while (newGame)
@@ -212,6 +213,7 @@ int main()
 		averageTime = 0;
 		averageTimeAfter4 = 0;
 		totalTime = 0;
+		averageCutCount = 0;
 
 		turn = 0;
 
@@ -241,12 +243,14 @@ int main()
 				averageTime += timeElapsed;
 				if (turn > 3) averageTimeAfter4 += timeElapsed;
 				printScreen(board);
+				averageCutCount += cutCount;
 
 				if (TIME_STATS)
 				{
 					cout << "This Turn:\t\t" << timeElapsed << endl;
 					cout << "Average Time:\t\t" << averageTime / (turn + 1) << endl;
-					cout << "Average After 4:\t" << averageTimeAfter4 / (turn - 3) << endl << endl;
+					cout << "Average After 4:\t" << averageTimeAfter4 / (turn - 3) << endl;
+					cout << "Cut Count:\t\t" << averageCutCount / (turn + 1) << endl;
 					cout << "Turn: \t\t\t" << turn + 1 << endl;
 				}
 
@@ -266,7 +270,7 @@ int main()
 					winner = 2;
 					break;
 				}
-				Sleep(1000);			
+				//Sleep(1000);			
 			}
 
 			if (whosTurn == 1) whosTurn = 2;
@@ -328,28 +332,20 @@ int staticEval(int board[][w_], int maximizer, int turn)
 	int maxOneToWinCount = 0, minOneToWinCount = 0;
 
 	maxOneToWinCount = oneToWinCount(board, maximizer);
-	//printScreen(board);
 	minOneToWinCount = oneToWinCount(board, minimizer);
-	//printScreen(board);
 
-	if (turn >= 10)
-	{
-		maxVTrapCount = vTrapCount(board, maximizer);
-		//printScreen(board);
-		minVTrapCount = vTrapCount(board, minimizer);
-		//printScreen(board);
-	}
+	maxVTrapCount = vTrapCount(board, maximizer);
+	minVTrapCount = vTrapCount(board, minimizer);
 
 	#ifdef _STATIC_EVAL_DEBUG
-		//printBoard(board, debug);
 		debug << "maxVTrapCount: " << maxVTrapCount << "\n";
 		debug << "minVTrapCount: " << minVTrapCount << "\n";
 		debug << "maxOneToWinCount: " << maxOneToWinCount << "\n";
 		debug << "maxOneToWinCount: " << minOneToWinCount << "\n";
 	#endif
 
-		int vTrapWeight = 3;
-		int oneToWinWeight = 10;
+	int vTrapWeight = 5000000;
+	int oneToWinWeight = 50;
 
 	score += vTrapWeight * maxVTrapCount;
 	score -= vTrapWeight * minVTrapCount;
@@ -361,13 +357,11 @@ int staticEval(int board[][w_], int maximizer, int turn)
 	//Check horizontal wins
 		if (hTrapDetect(board, maximizer))
 		{
-			//printScreen(board);
 			score += 5000000;
 		}
 
 		if (hTrapDetect(board, minimizer))
 		{
-			//printScreen(board);
 			score -= 5000000;
 		}
 
@@ -376,7 +370,6 @@ int staticEval(int board[][w_], int maximizer, int turn)
 		debug << "\t\tscore: " << score << "\n";
 		debug << "\texiting staticEval()\n\n";
 	#endif
-		//printScreen(board);
 	return score;
 }
 
