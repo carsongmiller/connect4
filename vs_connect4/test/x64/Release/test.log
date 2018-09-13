@@ -1,0 +1,7 @@
+﻿  test.cpp
+c:\users\carso\documents\connect4\vs_connect4\test\test.cpp(179): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\test\test.cpp(486): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+  Generating code
+  All 146 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  test.vcxproj -> C:\Users\carso\Documents\connect4\vs_connect4\x64\Release\test.exe

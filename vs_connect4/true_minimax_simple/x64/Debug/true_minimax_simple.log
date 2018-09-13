@@ -1,0 +1,4 @@
+﻿  con4.cpp
+c:\users\carso\documents\connect4\vs_connect4\true_minimax_simple\con4.cpp(170): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\true_minimax_simple\con4.cpp(508): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+  true_minimax_simple.vcxproj -> C:\Users\carso\Documents\connect4\vs_connect4\x64\Debug\true_minimax_simple.exe

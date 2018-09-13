@@ -1,0 +1,8 @@
+﻿  stdafx.cpp
+  host.cpp
+c:\users\carso\documents\connect4\vs_connect4\host\con4_util.h(490): warning C4101: 'first': unreferenced local variable
+c:\users\carso\documents\connect4\vs_connect4\host\host.cpp(9): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Generating code
+  All 91 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  host.vcxproj -> C:\Users\carso\Documents\connect4\vs_connect4\x64\Release\CvC.exe

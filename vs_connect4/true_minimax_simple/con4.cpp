@@ -33,7 +33,7 @@
 #define TYPICAL_DEPTH	8
 #define EARLY_DEPTH		8
 
-#define TIME_STATS		TRUE
+#define TIME_STATS		FALSE
 
 using namespace std;
 
@@ -206,8 +206,8 @@ int main()
 	{
 		boardInit(board);
 		system("cls");
-		//whosTurn = preGame();
-		whosTurn = cDisc;
+		whosTurn = preGame();
+		//whosTurn = cDisc;
 		printScreen(board);
 		MAX_DEPTH = TYPICAL_DEPTH;
 		averageTime = 0;

@@ -1,0 +1,5 @@
+﻿  stdafx.cpp
+  con4_nn.cpp
+c:\users\carso\documents\connect4\vs_connect4\con4_nn\con4_nn.cpp(5): fatal error C1083: Cannot open include file: 'neuron.h': No such file or directory
+  neuralnet.cpp
+c:\users\carso\documents\connect4\vs_connect4\con4_nn\neuralnet.cpp(187): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?

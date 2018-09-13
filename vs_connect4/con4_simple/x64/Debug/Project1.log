@@ -1,0 +1,10 @@
+﻿  connect4.cpp
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(133): warning C4101: 'validMove': unreferenced local variable
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(135): warning C4101: 'moveChoice': unreferenced local variable
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(281): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(283): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(299): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(301): warning C4244: '-=': conversion from 'double' to 'int', possible loss of data
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(241): warning C4101: 'hTrap': unreferenced local variable
+c:\users\carso\documents\connect4\vs_connect4\con4_simple\connect4.cpp(241): warning C4101: 'vTrap': unreferenced local variable
+  Project1.vcxproj -> C:\Users\carso\Documents\connect4\vs_connect4\x64\Debug\con4_simple.exe
